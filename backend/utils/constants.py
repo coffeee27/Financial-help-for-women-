@@ -1,0 +1,2 @@
+APP_NAME = "GirlsHack"
+DEFAULT_LANGUAGE = "en"
