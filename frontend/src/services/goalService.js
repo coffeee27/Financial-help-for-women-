@@ -1,40 +1,52 @@
 export function updateGoal(finance, goalId, amount){
 
-    const updatedGoals = finance.goals.map(goal=>{
 
-        if(goal.id === goalId){
+const updatedGoals = finance.goals.map(goal=>{
 
-            return {
-                ...goal,
-                saved: goal.saved + amount
-            };
+if(goal.id===goalId){
 
-        }
+return {
 
-        return goal;
+...goal,
 
-    });
+saved:goal.saved+amount
+
+};
+
+}
+
+return goal;
+
+});
 
 
-    return {
+return {
 
-        ...finance,
+...finance,
 
-        balance: finance.balance - amount,
+balance:finance.balance-amount,
 
-        goals: updatedGoals,
+goals:updatedGoals,
 
-        transactions:[
-            ...finance.transactions,
-            {
-                id:Date.now(),
-                type:"saving",
-                amount,
-                category:"Goal Deposit",
-                date:new Date().toISOString()
-            }
-        ]
+transactions:[
 
-    };
+...finance.transactions,
+
+{
+
+id:Date.now(),
+
+type:"saving",
+
+amount,
+
+category:"Goal Deposit"
+
+}
+
+]
+
+};
+
 
 }
