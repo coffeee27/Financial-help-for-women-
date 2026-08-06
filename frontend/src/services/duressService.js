@@ -1,25 +1,22 @@
 const pinStates = {
 
-    "1234":{
-        state:"normal",
-        dashboard:"financial"
-    },
+  "1234": {
+    mode: "real",
+    dashboard: "financial"
+  },
 
-
-    "9999":{
-        state:"duress",
-        dashboard:"safe"
-    }
+  "9999": {
+    mode: "decoy",
+    dashboard: "safe"
+  }
 
 };
 
 
-export function verifyPIN(pin){
+export function checkPIN(pin) {
 
-    return pinStates[pin] || {
-
-        state:"invalid"
-
-    };
+  return pinStates[pin] || {
+    mode: "invalid"
+  };
 
 }

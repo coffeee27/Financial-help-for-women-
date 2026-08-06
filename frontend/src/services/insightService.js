@@ -1,17 +1,19 @@
 export function getSavingsInsight(finance){
 
-    const possibleSaving = 150;
+
+const savingsAmount = 150;
 
 
-    return {
+return {
 
-        message:
-        `You can safely save ₹${possibleSaving} this week`,
+amount:savingsAmount,
 
-        amount: possibleSaving,
+message:
+`You can safely save ₹${savingsAmount} this week`,
 
-        confidence:"demo"
+source:"AI-demo"
 
-    };
+};
+
 
 }
