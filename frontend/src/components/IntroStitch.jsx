@@ -11,6 +11,9 @@ import LockDial, { STITCH_COUNTS } from "./LockDial";
  * Sewing is not decoration here: the goal she is saving for is a सिलाई मशीन.
  */
 
+// radius of the outer ring in LockDial's viewBox units
+const R_OUTER_RING = 174;
+
 const STAGES = [
   { at: 0.0, hi: "हर टाँके के साथ…", en: "With every stitch" },
   { at: 0.3, hi: "…कुछ अपना बनता है", en: "Something of her own takes shape" },
@@ -81,6 +84,24 @@ export default function IntroStitch({ onUnlocked }) {
   const dipFade = useTransform(stitchPhase, [0, 0.5, 0.64, 0.86, 1], [1, 1, 0.12, 0.16, 1]);
   // sinks toward the cloth as it goes in, lifts back out
   const dipDepth = useTransform(stitchPhase, [0, 0.5, 0.65, 0.87, 1], [0, 0, 5, 5, 0]);
+
+  /* Position the needle in polar coordinates rather than rotating a parent
+   * group around the dial centre.
+   *
+   * Framer Motion overrides transform-origin with the element's own bounding
+   * box centre whenever `rotate` is used. On the dial that is harmless — its
+   * box is already centred on the dial. On a group containing only the needle,
+   * "centre" is the needle itself, so the orbit collapsed into a spin on the
+   * spot. Translating to an explicit x/y and rotating about its own centre to
+   * stay tangential gives the same motion with nothing to override.
+   */
+  const needleRadius = useTransform(needleRing, (ring) => R_OUTER_RING - ring);
+  const needleX = useTransform([needleAngle, needleRadius], ([a, r]) =>
+    200 + r * Math.cos(((a - 90) * Math.PI) / 180)
+  );
+  const needleY = useTransform([needleAngle, needleRadius], ([a, r]) =>
+    200 + r * Math.sin(((a - 90) * Math.PI) / 180)
+  );
   const needleOpacity = useTransform(p, [0, 0.03, 0.9, 0.97], [0, 1, 1, 0]);
 
   const dialScale = useTransform(p, [0, 0.95], [0.92, 1]);
@@ -139,34 +160,41 @@ export default function IntroStitch({ onUnlocked }) {
               style={{ opacity: needleOpacity }}
               className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
             >
-              <motion.g
-                style={{ rotate: needleAngle, transformOrigin: "200px 200px", transformBox: "view-box" }}
-              >
-                {/* sits on the ring being sewn; needleRing walks it inward */}
-                <motion.g style={{ y: needleRing }}>
-                  {/* the thread stays on the surface — only the needle dives */}
+              {/* travels the circle by x/y; rotates about itself to stay
+                  tangential to the seam */}
+              {/* outer group only translates — no origin involved */}
+              <motion.g data-needle style={{ x: needleX, y: needleY }}>
+                {/* rotation and scale must pivot on the needle itself. In SVG a
+                    percentage transform-origin resolves against the view-box,
+                    so the default 50% 50% is the dial centre — which spun the
+                    already-positioned needle around the dial a second time.
+                    fill-box makes "center" mean this element's own box. */}
+                <motion.g
+                  style={{
+                    rotate: needleAngle,
+                    transformBox: "fill-box",
+                    transformOrigin: "center",
+                  }}
+                >
+                  {/* thread lies on the surface behind the needle — it does not
+                      dive; only the needle goes through the cloth */}
                   <path
-                    d="M188 26.8 C 178 28.4, 170 30.4, 162 34"
+                    d="M-13 0.8 C -23 2.4, -31 4.4, -39 8"
                     stroke="#B4532A" strokeWidth="1.5" fill="none"
                     strokeLinecap="round" opacity=".75"
                   />
-                  {/* needle, lying along the direction of travel, dipping
-                      through the cloth once per stitch */}
                   <motion.g
-                    data-needle
                     style={{
                       y: dipDepth,
                       scale: dipScale,
                       opacity: dipFade,
-                      transformOrigin: "200px 26px",
-                      transformBox: "view-box",
+                      transformBox: "fill-box",
+                      transformOrigin: "center",
                     }}
                   >
-                    <g transform="translate(200, 26)">
-                      <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 1.2 L-8 1.7 Z" fill="#8A8177" />
-                      <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 0 Z" fill="#DCD6CB" />
-                      <ellipse cx="-10.2" cy="0" rx="2" ry="0.8" fill="#F5EFE6" />
-                    </g>
+                    <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 1.2 L-8 1.7 Z" fill="#8A8177" />
+                    <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 0 Z" fill="#DCD6CB" />
+                    <ellipse cx="-10.2" cy="0" rx="2" ry="0.8" fill="#F5EFE6" />
                   </motion.g>
                 </motion.g>
               </motion.g>
