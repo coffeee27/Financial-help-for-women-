@@ -1,7 +1,7 @@
 // AIChat.jsx
 // Main AI Financial Assistant chat interface.
 // Combines text chat, voice input, voice output, chat history, and error/loading states.
-
+import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect, useCallback } from "react";
 import ChatWindow from "./ChatWindow";
 import TypingIndicator from "./TypingIndicator";
@@ -23,8 +23,9 @@ export default function AIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [voiceReplyEnabled, setVoiceReplyEnabled] = useState(true);
-
+  const { t, i18n } = useTranslation();
   const scrollRef = useRef(null);
+  const reply = await sendMessage(textToSend, historyForApi, i18n.language);
 
   const {
     transcript,
