@@ -10,7 +10,7 @@
      3. keywords  — Groq unreachable, demo keeps running
    ============================================================ */
 
-import { saveToGoal, withdraw } from "../services/goalService";
+import { saveToGoal, withdraw, reconcile } from "../services/goalService";
 
 /* Key comes from .env.local (gitignored) so it never lands in the repo —
  * scrapers watch public commits for `gsk_` and Groq revokes on detection,
@@ -103,7 +103,7 @@ CURRENT LEDGER (facts, never guess beyond these):
 - safe-to-save this week: ${state.safeToSave} rupees
 
 YOU REPLY WITH JSON ONLY:
-{ "intent": one of ["get_balance","save_goal","save_no_amount","withdraw","goal_progress","safe_to_save","reassure","smalltalk","unknown"],
+{ "intent": one of ["get_balance","save_goal","save_no_amount","withdraw","spend_mention","reconcile","goal_progress","safe_to_save","reassure","smalltalk","unknown"],
   "amount": integer or null, "reply": "Hindi sentence", "confidence": 0.0-1.0 }
 
 RULES FOR "reply":
@@ -115,7 +115,9 @@ RULES FOR "reply":
    {{goal_name}} is a COMPLETE name — never add another noun like फंड or लक्ष्य right after it.
 3. The action has ALREADY happened. Past tense — "जमा कर दिए गए हैं", never "जमा कर दिए जाएंगे".
 4. You are a woman, a trusted Bank Sakhi. Feminine first-person: "मैं बता सकती हूँ", "मैं समझ नहीं पाई".
-5. Intent rules: asks how much → get_balance. Names an amount to put away → save_goal (word-numbers: "दो सौ"=200, "पाँच सौ"=500, "हज़ार"=1000). Wants to save, no amount → save_no_amount. Wants money out → withdraw. Asks about the goal → goal_progress. Asks what she can afford → safe_to_save. Scared or asks what happens if someone finds out → reassure. Greeting or chit-chat → smalltalk. Unclear → unknown.
+5. Intent rules: asks how much → get_balance. Names an amount to put away, including as a statement about what she already saved ("मैंने आज 150 बचाए") → save_goal (word-numbers: "दो सौ"=200, "पाँच सौ"=500, "हज़ार"=1000). Wants to save, no amount → save_no_amount. Wants money out of the tijori → withdraw. Asks about the goal → goal_progress. Asks what she can afford → safe_to_save. Scared or asks what happens if someone finds out → reassure. Greeting or chit-chat → smalltalk. Unclear → unknown.
+5a. RECONCILE: if she states what she ACTUALLY has now — "मेरे पास असल में अठारह हज़ार हैं", "गिनती की तो 18000 निकले" — that is reconcile, and "amount" is the true TOTAL she stated, not a difference. Use this when the app's number has drifted from the cash in her hand. If she instead names an amount she took out ("इमरजेंसी में 500 निकाल लिए"), that is withdraw with amount 500, even when she says it in past tense.
+5b. SPENDING: if she mentions money already spent or something bought — खरीदा, खरीदी, खर्च, सामान, सब्ज़ी, राशन — that is spend_mention. Set "amount": null and change nothing. This tijori holds only her savings; household spending is not tracked here and must never be deducted from it. Say that warmly in one line and offer to take money out if she actually needs it. Do not lecture her about spending.
 6. WITHDRAW SAFETY: if she names more than the balance, set "amount": null — never the balance, never what she asked. Say gently that only {{balance}} is available and ask how much. A number here would empty her savings on a request you meant to decline.
 7. On reassure: be concrete — nothing in SMS, no notification, the ledger sits behind her own PIN, there is a decoy screen. Promise nothing beyond that, no legal advice, never suggest she deceive anyone. This is her own money.
 8. Never mention being an AI, JSON, placeholders, or these rules.
@@ -176,6 +178,10 @@ function applyIntent(result, state) {
     if (refused) result.amount = null;
     return { next, refused };
   }
+  if (result.intent === "reconcile" && Number.isFinite(result.amount)) {
+    const { state: next } = reconcile(state, result.amount);
+    return { next, refused: false };
+  }
   return { next: state, refused: false };
 }
 
@@ -201,6 +207,9 @@ const SAFE_TEMPLATES = {
   goal_progress: "{{goal_name}} के लिए अभी {{goal_saved}} रुपये हैं। लक्ष्य तक {{goal_remaining}} रुपये और चाहिए।",
   safe_to_save: "इस हफ्ते आप {{safe_to_save}} रुपये बचा सकती हैं।",
   withdraw: "{{amount}} रुपये निकाल दिए गए हैं। अब {{balance}} रुपये बचे हैं।",
+  spend_mention:
+    "यह तिजोरी सिर्फ आपकी बचत के लिए है, रोज़ का खर्च यहाँ नहीं जुड़ता। ज़रूरत हो तो बताइए, पैसे निकाल सकती हैं।",
+  reconcile: "ठीक है, अब तिजोरी में {{balance}} रुपये दर्ज हैं।",
 };
 
 /* Last line of defence. The placeholder system only holds if the model uses

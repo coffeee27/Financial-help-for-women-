@@ -39,6 +39,41 @@ export function withdraw(state, amount) {
   };
 }
 
+/* Correct the ledger to what she actually has.
+ *
+ * If she takes money out in an emergency and doesn't tell the app, the number
+ * on screen drifts from the cash in her hand — and a savings app whose number
+ * is wrong is worse than no app, because she stops trusting it. This lets her
+ * state the true total in one sentence and logs the difference so the history
+ * stays honest rather than silently rewritten.
+ */
+export function reconcile(state, actualTotal) {
+  const actual = Math.max(0, Math.round(actualTotal || 0));
+  const diff = actual - state.hiddenSavings;
+  if (diff === 0) return { state, diff: 0 };
+
+  return {
+    state: {
+      ...state,
+      hiddenSavings: actual,
+      goal: state.goal
+        ? { ...state.goal, saved: Math.max(0, state.goal.saved + diff) }
+        : null,
+      transactions: [
+        {
+          id: Date.now(),
+          type: diff > 0 ? "save" : "withdraw",
+          amount: Math.abs(diff),
+          label: "मिलान",
+          date: "अभी",
+        },
+        ...state.transactions,
+      ],
+    },
+    diff,
+  };
+}
+
 export function goalProgress(goal) {
   if (!goal || !goal.target) return 0;
   return Math.min(100, Math.round((goal.saved / goal.target) * 100));
