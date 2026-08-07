@@ -106,18 +106,40 @@ export function matchIntent(transcriptRaw) {
 }
 
 /* ---------- Tier 2: Groq ---------- */
-function buildSystemPrompt(state) {
+function buildSystemPrompt(state, pending) {
   const g = state.goal;
+  const weeksCost = pending && g && state.safeToSave
+    ? Math.ceil(pending.amount / state.safeToSave)
+    : null;
+
+  /* When money is waiting on her decision, the coach's job changes: find out
+   * what it is for, then say something actually useful about it. Never refuse,
+   * never shame, never decide for her. */
+  const pendingBlock = pending
+    ? `
+
+PENDING WITHDRAWAL — ${pending.amount} rupees, asked for but NOT yet taken out. She has not decided.
+${weeksCost ? `Taking it would put the goal roughly ${weeksCost} week(s) further away.` : ""}
+- If you do not yet know what the money is for, ask ONE short warm question. No suspicion, no interrogation.
+- Once you know, use intent "withdraw_advice" and give one short, concrete view:
+  · Medicine, illness, hospital, a child's school fees, food, rent, travel to a doctor — say plainly this is worth taking the money out for. Her wellbeing comes before the goal. Never guard the savings against a real need.
+  · Something she wants that could wait — mention in one sentence what it costs the goal, and offer taking out a smaller amount instead. No lecture, no disappointment.
+  · Someone else is asking her for this money — do NOT tell her to refuse and do NOT tell her to hand it over. Say it is her money and her decision, that she can take out part of it rather than all, and that nothing is recorded anywhere. Never tell her to confront or defy anyone. Never imply she is foolish or weak.
+  · Still unclear — ask one more short question.
+- ALWAYS end by leaving the choice with her. Never say what she must do.
+- Someone may be reading this screen over her shoulder. Never mention hiding money from a named person, never mention deception, never say anything that would put her in danger if read aloud.`
+    : "";
+
   return `You are Tijori — a calm, warm Hindi-speaking money coach for an Indian woman who may not read well and may share her phone with family members who must not learn about these savings.
 
 CURRENT LEDGER (facts, never guess beyond these):
 - hidden savings: ${state.hiddenSavings} rupees
 - goal name: ${g ? g.name : "कोई लक्ष्य नहीं"}
 - goal saved: ${g ? g.saved : 0} of ${g ? g.target : 0} rupees
-- safe-to-save this week: ${state.safeToSave} rupees
+- safe-to-save this week: ${state.safeToSave} rupees${pendingBlock}
 
 YOU REPLY WITH JSON ONLY:
-{ "intent": one of ["get_balance","save_goal","save_no_amount","withdraw","emergency_consult","emergency_withdraw","spend_mention","reconcile","goal_progress","safe_to_save","set_goal","goal_achieved","reassure","smalltalk","unknown"],
+{ "intent": one of ["get_balance","save_goal","save_no_amount","withdraw","withdraw_advice","emergency_consult","emergency_withdraw","spend_mention","reconcile","goal_progress","safe_to_save","set_goal","goal_achieved","reassure","smalltalk","unknown"],
   "amount": integer or null, "goal_name": string or null, "goal_target": integer or null, "reply": "Hindi sentence", "confidence": 0.0-1.0 }
 
 RULES FOR "reply":
@@ -168,11 +190,11 @@ async function postToGroq(model, messages, signal) {
   });
 }
 
-async function callGroq(transcript, state) {
+async function callGroq(transcript, state, pending) {
   if (!GROQ_API_KEY) throw new Error("no-key");
   console.debug("[Tijori] → Groq", transcript.slice(0, 60));
 
-  const messages = [{ role: "system", content: buildSystemPrompt(state) }, ...history,
+  const messages = [{ role: "system", content: buildSystemPrompt(state, pending) }, ...history,
     { role: "user", content: transcript }];
 
   const controller = new AbortController();
@@ -259,7 +281,7 @@ async function applyIntent(result, state) {
     }
     result.amount = amt;
     result.pending = { amount: amt };
-    result.reply = "{{amount}} रुपये निकालने से पहले एक बार साथ में देख लेते हैं।";
+    result.reply = "{{amount}} रुपये — किस लिए चाहिए? बता दीजिए तो साथ मिलकर सोच लेते हैं।";
     return { next: state, refused: false };
   }
   if (result.intent === "reconcile" && Number.isFinite(result.amount)) {
@@ -292,7 +314,7 @@ async function applyIntent(result, state) {
     }
     result.amount = amt;
     result.pending = { amount: amt };
-    result.reply = "{{amount}} रुपये निकालने से पहले एक बार साथ में देख लेते हैं।";
+    result.reply = "{{amount}} रुपये — किस लिए चाहिए? बता दीजिए तो साथ मिलकर सोच लेते हैं।";
     return { next: state, refused: false };
   }
   if (result.intent === "goal_achieved") {
@@ -334,6 +356,7 @@ const SAFE_TEMPLATES = {
   spend_mention:
     "यह तिजोरी सिर्फ आपकी बचत के लिए है, रोज़ का खर्च यहाँ नहीं जुड़ता। ज़रूरत हो तो बताइए, पैसे निकाल सकती हैं।",
   reconcile: "ठीक है, अब तिजोरी में {{balance}} रुपये दर्ज हैं।",
+  withdraw_advice: "पैसे आपके हैं और फैसला भी आपका। जो ठीक लगे वही कीजिए।",
   set_goal: "बिल्कुल! {{goal_name}} आपका नया सपना है। लक्ष्य {{goal_target}} रुपये रखा है — ठीक है या बदलना है?",
   goal_achieved: "मुबारक हो! आपका सपना पूरा हुआ। अब अगला सपना क्या है?",
   emergency_consult: "आपके पास अभी {{balance}} रुपये हैं। {{goal_name}} तक {{goal_remaining}} रुपये बाकी हैं। बताइए कितने निकालने हैं, मैं यहाँ हूँ।",
@@ -426,7 +449,7 @@ export async function processInput(transcript, state, opts = {}) {
   // Tier 2
   if (useGroq) {
     try {
-      const ai = await callGroq(transcript, state);
+      const ai = await callGroq(transcript, state, opts.pending);
       const { next, refused } = await applyAndMaybeComplete(ai, state);
       if (refused && !ai.reply.includes("{{balance}}")) {
         ai.reply = "आपके पास अभी {{balance}} रुपये ही हैं। कितने निकालने हैं?";

@@ -28,6 +28,9 @@ export function useVoice(state, setState) {
   // snapshot captured when the mic started.
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+  // same reason: send() is memoised, so read pending through a ref
+  const pendingRef = useRef(pending);
+  useEffect(() => { pendingRef.current = pending; }, [pending]);
 
   /* Chrome treats a *dismissed* permission prompt as a denial and will not ask
      again, which is the usual reason a mic that worked yesterday is dead
@@ -52,7 +55,9 @@ export function useVoice(state, setState) {
     setThinking(true);
     setError(null);
     try {
-      const res = await processInput(text, stateRef.current, {});
+      // the coach needs to know a withdrawal is waiting on her, so it can ask
+      // what it's for and advise on that rather than answering in the abstract
+      const res = await processInput(text, stateRef.current, { pending: pendingRef.current });
       setState(res.state);
       setReply(res.reply);
       setMeta({ intent: res.intent, source: res.source, ms: res.ms, repaired: res.repaired });
