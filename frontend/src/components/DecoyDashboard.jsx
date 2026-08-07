@@ -27,6 +27,7 @@ import BottomNav from "./Dashboard/BottomNav";
 const TITLES = {
   goals: { hi: "लक्ष्य", en: "Goals" },
   voice: { hi: "आवाज़", en: "Voice" },
+  emergency: { hi: "मदद", en: "Support" },
   settings: { hi: "सेटिंग्स", en: "Settings" },
 };
 
@@ -151,6 +152,26 @@ export default function DecoyDashboard({ onLock }) {
                                    border border-sand-300 rounded-full px-6 py-2.5">
                   चालू कीजिए
                 </button>
+              </div>
+            )}
+
+            {/* Ordinary help page. Nothing here hints that a withdrawal review
+                exists on the other side, because that review is only meaningful
+                for savings this account does not appear to have. */}
+            {tab === "emergency" && (
+              <div className="rounded-5xl bg-sand-50 shadow-card border border-sand-300/60
+                              p-8 text-center">
+                <div className="mx-auto w-12 h-12 rounded-full bg-sand-200
+                                flex items-center justify-center mb-4">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B5A798"
+                       strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" />
+                  </svg>
+                </div>
+                <p className="deva text-[15px] text-bark-700">मदद चाहिए?</p>
+                <p className="deva text-[12.5px] text-bark-500 mt-2 leading-relaxed">
+                  खाते से जुड़ी किसी भी दिक्कत के लिए अपनी बैंक सखी से बात कीजिए।
+                </p>
               </div>
             )}
 

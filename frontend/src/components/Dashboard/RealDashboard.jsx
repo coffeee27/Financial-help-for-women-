@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFinance } from "../../context/FinanceContext";
 import { useVoice } from "../../hooks/useVoice";
 import BalanceCard from "./BalanceCard";
@@ -11,11 +11,13 @@ import BottomNav from "./BottomNav";
 import GoalsView from "./GoalsView";
 import VoiceView from "./VoiceView";
 import SettingsView from "./SettingsView";
+import EmergencyView from "./EmergencyView";
 import VoicePanel from "../VoicePanel";
 
 const TITLES = {
   goals: { hi: "लक्ष्य", en: "Goals" },
   voice: { hi: "आवाज़", en: "Voice" },
+  emergency: { hi: "सोच लीजिए", en: "Support" },
   settings: { hi: "सेटिंग्स", en: "Settings" },
 };
 
@@ -29,6 +31,16 @@ export default function RealDashboard({ onLock }) {
     setTab(next);
     scrollRef.current?.scrollTo({ top: 0 });
   };
+
+  /* Asking for money out takes her straight to the review screen, wherever she
+   * was. She can also reach it herself from the nav — the point is that the
+   * pause happens either way, not that she has to remember to ask for it. */
+  useEffect(() => {
+    if (voice.pending) {
+      setTab("emergency");
+      scrollRef.current?.scrollTo({ top: 0 });
+    }
+  }, [voice.pending]);
 
   return (
     <div className="h-[100svh] overflow-hidden flex flex-col bg-sand-200 paper">
@@ -117,6 +129,9 @@ export default function RealDashboard({ onLock }) {
 
             {tab === "goals" && <GoalsView state={state} />}
             {tab === "voice" && <VoiceView voice={voice} />}
+            {tab === "emergency" && (
+              <EmergencyView state={state} setState={setState} voice={voice} />
+            )}
             {tab === "settings" && <SettingsView onLock={onLock} />}
           </motion.div>
         </div>

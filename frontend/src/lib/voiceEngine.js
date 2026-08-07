@@ -245,10 +245,22 @@ async function applyIntent(result, state) {
   if (result.intent === "save_goal" && result.amount) {
     return { next: saveToGoal(state, result.amount), refused: false };
   }
+  /* Withdrawals are REQUESTED here, never executed.
+   *
+   * Asking for money out opens the review screen with a pending request; the
+   * ledger only moves when she confirms there. That pause is the whole point:
+   * if someone is standing over her, the gap between "give me the money" and
+   * the money actually moving is the only thing she controls. */
   if (result.intent === "withdraw" && result.amount) {
-    const { state: next, refused } = withdraw(state, result.amount);
-    if (refused) result.amount = null;
-    return { next, refused };
+    const amt = Math.abs(Math.round(result.amount));
+    if (amt > state.hiddenSavings) {
+      result.amount = null;
+      return { next: state, refused: true };
+    }
+    result.amount = amt;
+    result.pending = { amount: amt };
+    result.reply = "{{amount}} रुपये निकालने से पहले एक बार साथ में देख लेते हैं।";
+    return { next: state, refused: false };
   }
   if (result.intent === "reconcile" && Number.isFinite(result.amount)) {
     const { state: next } = reconcile(state, result.amount);
@@ -273,9 +285,15 @@ async function applyIntent(result, state) {
     return { next: state, refused: false };
   }
   if (result.intent === "emergency_withdraw" && result.amount) {
-    const { state: next, refused } = emergencyWithdraw(state, result.amount);
-    if (refused) result.amount = null;
-    return { next, refused };
+    const amt = Math.abs(Math.round(result.amount));
+    if (amt > state.hiddenSavings) {
+      result.amount = null;
+      return { next: state, refused: true };
+    }
+    result.amount = amt;
+    result.pending = { amount: amt };
+    result.reply = "{{amount}} रुपये निकालने से पहले एक बार साथ में देख लेते हैं।";
+    return { next: state, refused: false };
   }
   if (result.intent === "goal_achieved") {
     // Capture name before it's cleared so the reply template can use it.
@@ -310,14 +328,16 @@ const SAFE_TEMPLATES = {
   save_goal: "{{amount}} रुपये {{goal_name}} में जमा कर दिए गए हैं। अब {{goal_saved}} रुपये हो गए हैं।",
   goal_progress: "{{goal_name}} के लिए अभी {{goal_saved}} रुपये हैं। लक्ष्य तक {{goal_remaining}} रुपये और चाहिए।",
   safe_to_save: "इस हफ्ते आप {{safe_to_save}} रुपये बचा सकती हैं।",
-  withdraw: "{{amount}} रुपये निकाल दिए गए हैं। अब {{balance}} रुपये बचे हैं।",
+  /* Pending, not done — the money has not moved yet, so these must never
+   * claim it has. The review screen is what completes it. */
+  withdraw: "{{amount}} रुपये निकालने से पहले एक बार साथ में देख लेते हैं।",
   spend_mention:
     "यह तिजोरी सिर्फ आपकी बचत के लिए है, रोज़ का खर्च यहाँ नहीं जुड़ता। ज़रूरत हो तो बताइए, पैसे निकाल सकती हैं।",
   reconcile: "ठीक है, अब तिजोरी में {{balance}} रुपये दर्ज हैं।",
   set_goal: "बिल्कुल! {{goal_name}} आपका नया सपना है। लक्ष्य {{goal_target}} रुपये रखा है — ठीक है या बदलना है?",
   goal_achieved: "मुबारक हो! आपका सपना पूरा हुआ। अब अगला सपना क्या है?",
   emergency_consult: "आपके पास अभी {{balance}} रुपये हैं। {{goal_name}} तक {{goal_remaining}} रुपये बाकी हैं। बताइए कितने निकालने हैं, मैं यहाँ हूँ।",
-  emergency_withdraw: "{{amount}} रुपये ज़रूरी निकासी के रूप में निकाल दिए गए हैं। अब {{balance}} रुपये बचे हैं।",
+  emergency_withdraw: "{{amount}} रुपये निकालने से पहले एक बार साथ में देख लेते हैं।",
 };
 
 /* Last line of defence. The placeholder system only holds if the model uses
@@ -355,6 +375,9 @@ export async function processInput(transcript, state, opts = {}) {
     return {
       reply: guarded.reply, intent: result.intent, amount: result.amount ?? null,
       repaired: guarded.repaired, state: next, source,
+      // set when she has asked for money out; the UI opens the review screen
+      // and the ledger only moves once she confirms there
+      pending: result.pending || null,
       ms: Math.round(performance.now() - started),
     };
   };

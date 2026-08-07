@@ -4,6 +4,9 @@ const ITEMS = [
   { id: "home", label: "Home", icon: "M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" },
   { id: "goals", label: "Goals", icon: "M12 3v18M3 12h18" },
   { id: "voice", label: "Voice", icon: "M9 2h6v12H9zM5 11a7 7 0 0 0 14 0" },
+  // A heart, not a siren. This tab is visible to anyone looking over her
+  // shoulder, so it must read as ordinary care, not an alarm.
+  { id: "emergency", label: "Support", icon: "M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" },
   { id: "settings", label: "Settings", icon: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 5 9.5l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10.5 5.6V5a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 7.5l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" },
 ];
 

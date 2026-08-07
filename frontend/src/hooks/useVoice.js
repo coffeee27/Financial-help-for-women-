@@ -20,6 +20,8 @@ export function useVoice(state, setState) {
   const [meta, setMeta] = useState(null);
   const [error, setError] = useState(null);
   const [micPermission, setMicPermission] = useState("unknown");
+  // a withdrawal she has asked for but not yet confirmed
+  const [pending, setPending] = useState(null);
 
   const recognitionRef = useRef(null);
   // Ref so the recognition callback always sees current state, not the
@@ -54,6 +56,7 @@ export function useVoice(state, setState) {
       setState(res.state);
       setReply(res.reply);
       setMeta({ intent: res.intent, source: res.source, ms: res.ms, repaired: res.repaired });
+      if (res.pending) setPending(res.pending);
       speak(res.reply);
     } catch (e) {
       setError(e.message || "process-failed");
@@ -115,8 +118,11 @@ export function useVoice(state, setState) {
     setReply(null); setTranscript(""); setMeta(null); setError(null);
   }, []);
 
+  const clearPending = useCallback(() => setPending(null), []);
+
   return {
     listening, thinking, transcript, reply, meta, error, micPermission,
+    pending, clearPending,
     start, stop, send, clear,
     sttSupported: !!SpeechRecognitionAPI,
   };
