@@ -200,3 +200,12 @@ The demo, in order:
    - `1234` → the real tijori
    - `9999` → the decoy
 3. **Tap the mic and speak Hindi**, or type into the box below it.
+
+---
+
+## License
+
+MIT
+
+--- 
+Built with ❤️ by for Girls Hack Day Hackathon.
