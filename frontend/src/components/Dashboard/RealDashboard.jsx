@@ -12,6 +12,7 @@ import GoalsView from "./GoalsView";
 import VoiceView from "./VoiceView";
 import SettingsView from "./SettingsView";
 import EmergencyView from "./EmergencyView";
+import GrowthCard from "./GrowthCard";
 import VoicePanel from "../VoicePanel";
 
 const TITLES = {
@@ -102,6 +103,7 @@ export default function RealDashboard({ onLock }) {
                   <BalanceCard amount={state.hiddenSavings} weekDelta={state.weekDelta} />
                   <GoalCard goal={state.goal} state={state} />
                   <InsightCard state={state} />
+                  <GrowthCard state={state} />
                   <TransactionList transactions={state.transactions} />
                 </div>
 
