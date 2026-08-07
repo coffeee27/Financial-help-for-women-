@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# the old standalone voice harness — superseded by frontend/, and it still has
+# a live key hardcoded in it. Kept on disk, kept out of the repo.
+/index.html
+
+# local launch config, points at machine-specific paths
+.claude/
+
+# editors / os
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
