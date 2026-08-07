@@ -1,5 +1,4 @@
-Tijori
-The safe she controls
+## Tijori - The safe she controls
 
 A voice-first financial coach for 200+ million Indian women locked out of their own accounts — not by a smartphone gap, but by a household one.
 
@@ -54,31 +53,31 @@ Tijori turns a shared household phone into a private financial tool.
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                      USER LAYER                          │
-│                                                            │
-│   Shared Phone ──► Browser (Chrome) ──► Web Speech API    │
-└────────────────────────┬───────────────────────────────────┘
+│                                                          │
+│   Shared Phone ──► Browser (Chrome) ──► Web Speech API   │
+└─────────────────────────┬────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│              FRONTEND (React + Vite :5173)               │
-│                                                            │
-│   PIN / Dial ──► Dashboard ──► useVoice hook              │
-└────────┬────────────────────────────┬─────────────────────┘
+│              FRONTEND (React + Vite :5173)              │
+│                                                         │
+│   PIN / Dial ──► Dashboard ──► useVoice hook            │
+└────────┬────────────────────────────┬───────────────────┘
          │                            │
          ▼                            ▼
 ┌──────────────────────┐    ┌──────────────────────────┐
-│   voiceEngine.js      │    │   FASTAPI BACKEND         │
-│                        │    │                            │
-│   Local ledger tier   │    │   Document analysis        │
-│   Groq tier            │◄──►│   Budgeting logic          │
-│   Keyword fallback     │    │   Voice request handling   │
+│   voiceEngine.js     │    │   FASTAPI BACKEND        │
+│                      │    │                          │
+│   Local ledger tier  │    │   Document analysis      │
+│   Groq tier          │◄──►│   Budgeting logic        │
+│   Keyword fallback   │    │   Voice request handling │
 └──────────────────────┘    └──────────────────────────┘
                                           │
                                           ▼
-                              ┌──────────────────────────┐
+                              ┌────────────────────────────┐
                               │  Account Aggregator +      │
                               │  UPI Circle (sandbox/mock) │
-                              └──────────────────────────┘
+                              └────────────────────────────┘
 ```
 
 ### Project Structure
