@@ -1,0 +1,43 @@
+{
+  "app": {
+    "name": "Financial Help for Women"
+  },
+  "pin": {
+    "title": "Enter your PIN",
+    "subtitle": "Enter your 4-digit PIN to continue",
+    "submit": "Unlock",
+    "error": "Incorrect PIN. Please try again."
+  },
+  "dashboard": {
+    "greeting": "Welcome back",
+    "balance": "Balance",
+    "goals": "Your Goals",
+    "addGoal": "Add Goal",
+    "insights": "Insights",
+    "savingsTip": "You could safely save ₹{{amount}} this week",
+    "transactions": "Recent Transactions"
+  },
+  "chat": {
+    "title": "Financial Assistant",
+    "subtitle": "Always here, always patient",
+    "welcome": "Hi! I'm your financial mentor. Ask me anything about savings, budgeting, scams, or your goals — no question is too small.",
+    "placeholder": "Ask about savings, budgeting, scams…",
+    "listening": "Listening…",
+    "voiceOn": "Voice replies on",
+    "voiceOff": "Voice replies off",
+    "send": "Send"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong. Please try again.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "hindi": "हिन्दी"
+  }
+}

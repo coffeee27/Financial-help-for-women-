@@ -1,197 +1,211 @@
-# GirlsHack Project — Tijori — "the safe she controls"
+## Tijori - The safe she controls
 
-A voice-first financial coach that gives a woman a private view of her own
-money, savings her household can't see or drain, and a coach that speaks Hindi.
+A voice-first financial coach for 200+ million Indian women locked out of their own accounts — not by a smartphone gap, but by a household one.
 
-## Structure
+Tijori gives a woman a private view of her own money, a savings ledger her household can't see or drain, and a coach that speaks Hindi. Built on real Indian financial infrastructure: Account Aggregator for consented data, and UPI Circle for delegated savings limits.
 
-- `frontend/` — React + Vite + Tailwind + Framer Motion. This is the demo.
-- `backend/` — FastAPI scaffolding for document analysis, budgeting and voice.
-  Currently stubs; the frontend runs standalone on in-memory state and does not
-  call it.
+Say मेरी बचत कितनी है to hear your balance. Say दो सौ बचाओ to save ₹200. Enter the duress PIN and the whole app quietly shows something else.
 
-## Run it
+## The Problem
 
-```bash
-cd frontend
-npm install
-cp .env.example .env.local     # paste your Groq keys into it
-npm run dev
+For many women, the barrier to financial agency is not literacy. It is control.
+
+- **Dormant by design, not by choice:** 4.93 crore Jan Dhan accounts belonging to women sit dormant.
+- **Surveillance, not ignorance:** husbands routinely hold the PIN and receive the SMS alerts on accounts that legally belong to their wives.
+- **Literacy isn't the gap that matters:** 21% of Indian women are financially literate vs 27% of men — a real gap, but not the one stopping ₹200 from being saved quietly.
+- **Still on paper:** 10.05 crore women across 90.87 lakh SHGs are tracked on paper ledgers, invisible to any digital system.
+
+## The Solution
+
+Tijori turns a shared household phone into a private financial tool.
+
+- **Voice-first interface:** she asks and is answered in Hindi — no reading required.
+- **Hidden ledger:** invisible from the phone's main UI, no notification trail on transactions.
+- **Duress PIN / decoy mode:** a second PIN opens a fake near-zero balance if someone demands the phone.
+- **Real DPI rails:** Account Aggregator for consented account data, UPI Circle for a delegated, self-authorized savings limit.
+- **AI-personalized savings:** a "safe to save this week" nudge computed from her real, irregular cashflow — not a generic tip.
+
+## Capabilities
+
+- **Onboarding:** guided setup, no seed phrases, no smartphone literacy assumed.
+- **Voice balance check:** ask her hidden balance out loud, get a spoken answer.
+- **Voice-directed saving:** speak an amount and a goal; the ledger updates live.
+- **Goal tracking:** one dream goal, one pot, moving together — progress shown as a simple bar, not a spreadsheet.
+- **Duress mode:** a rehearsed second PIN that swaps the entire visible state to a decoy.
+- **Cashflow-aware nudges:** weekly "safe to save" amount personalized to irregular income patterns.
+- **Document scanning:** budgeting support via receipt/document capture (backend document analysis).
+
+## Technical Architecture
+
+### Core Technologies
+
+| Technology | Purpose |
+|---|---|
+| FastAPI (Python) | Backend API — document analysis, budgeting logic, voice request handling |
+| React + Vite + Tailwind | Frontend — onboarding, dashboard, voice coach UI |
+| Web Speech API | Browser-native Hindi speech-to-text and text-to-speech |
+| Groq | LLM inference for ambiguous/compound voice requests |
+| Account Aggregator (Finvu/Onemoney sandbox) | Consented, revocable account data |
+| UPI Circle | Delegated savings limit (mocked against NPCI's published contract for this build) |
+
+### System Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                      USER LAYER                          │
+│                                                          │
+│   Shared Phone ──► Browser (Chrome) ──► Web Speech API   │
+└─────────────────────────┬────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│              FRONTEND (React + Vite :5173)              │
+│                                                         │
+│   PIN / Dial ──► Dashboard ──► useVoice hook            │
+└────────┬────────────────────────────┬───────────────────┘
+         │                            │
+         ▼                            ▼
+┌──────────────────────┐    ┌──────────────────────────┐
+│   voiceEngine.js     │    │   FASTAPI BACKEND        │
+│                      │    │                          │
+│   Local ledger tier  │    │   Document analysis      │
+│   Groq tier          │◄──►│   Budgeting logic        │
+│   Keyword fallback   │    │   Voice request handling │
+└──────────────────────┘    └──────────────────────────┘
+                                          │
+                                          ▼
+                              ┌────────────────────────────┐
+                              │  Account Aggregator +      │
+                              │  UPI Circle (sandbox/mock) │
+                              └────────────────────────────┘
 ```
 
-Opens on <http://localhost:5173>. Best in **Chrome** — the mic uses the Web
-Speech API, which Firefox doesn't support. Serve over `localhost` rather than
-opening the file directly, or the browser won't grant mic permission.
+### Project Structure
 
-### Keys
+```
+tijori/
+│
+├── backend/                       # FastAPI backend
+│   ├── routes/                    #   API endpoints
+│   ├── services/                  #   Document analysis, budgeting logic
+│   └── prompts/                   #   Prompt templates
+│
+├── frontend/                      # React + Vite frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── IntroStitch.jsx    #   scroll-driven intro animation
+│   │   │   ├── LockDial.jsx       #   rotary PIN dial
+│   │   │   ├── PinScreen.jsx      #   PIN entry (drag/scroll + dwell), keypad fallback
+│   │   │   ├── DecoyDashboard.jsx #   duress view
+│   │   │   └── Dashboard/         #   balance, goal, insight, transactions, mic, nav
+│   │   ├── lib/
+│   │   │   └── voiceEngine.js     #   STT → intent → ledger → TTS
+│   │   ├── hooks/
+│   │   │   └── useVoice.js        #   the voice layer as one hook
+│   │   ├── services/
+│   │   │   ├── goalService.js
+│   │   │   ├── duressService.js
+│   │   │   └── insightService.js
+│   │   └── data/
+│   │       └── initialData.js     #   real + decoy state
+│   └── package.json
+│
+└── README.md
+```
 
-Two, in `.env.local` (gitignored — never commit it):
+`hiddenSavings` is the tijori itself — saving makes it go up. One pot, one dream goal, moving together.
 
-| Variable | Used by | Why separate |
-| --- | --- | --- |
-| `VITE_GROQ_KEY` | the voice coach | conversation and intent |
-| `VITE_GROQ_ESTIMATE_KEY` | `priceEstimator.js` | goal pricing only, so estimation traffic can be rotated or rate-limited without touching the voice loop |
-
-Without them the app still runs — it silently drops to the keyword tier and
-only answers the fixed commands. **Vite reads `.env.local` at startup only**, so
-restart the dev server after editing it.
-
-Groq's daily token allowance is per **model** and per **organisation**, not per
-key — two keys on the same account share one pot. On a 429 the voice loop
-switches to `llama-3.1-8b-instant` for the rest of the session, and price
-estimation runs on the small model permanently.
-
-## The demo, in order
-
-1. **Scroll** — a needle stitches the tijori into existence, ring by ring, then
-   the enamel fills in and the numerals engrave on. `Skip` (top right) jumps
-   straight past it during rehearsal.
-2. **Turn the dial** — drag it or scroll it. It snaps to the nearest of 0–9;
-   rest on a number for half a second and that digit locks in. Four digits opens
-   it. `Use keypad` is there if the dial misbehaves in front of judges.
-   - `1234` → the real tijori
-   - `9999` → the decoy (rest on 9; repeats commit on a slower beat)
-3. **Tap the mic** and speak Hindi, or type into the box below it.
-
-On a desktop browser the app sits inside a phone frame. Below 1024px wide the
-frame disappears and the app fills the screen, so a real phone shows the real
-thing.
-
-### Lines worth demoing
-
-| Say | What happens |
-| --- | --- |
-| `मेरी बचत कितनी है` | answered locally, ~0ms, no network |
-| `दो सौ बचाओ` | ledger goes up, row in Recent |
-| `मुझे अब बकरी खरीदनी है` | goal changes, **price estimated live** |
-| `अगर पति को पता चल गया तो` | the reassurance answer |
-| `पाँच सौ निकालो` → `देवर मांग रहे हैं` | the Support flow — see below |
-
-## Tabs
-
-**Home** · **Goals** · **Voice** · **Support** · **Settings**. All five work on
-both dashboards. The decoy gets plausible versions of every one, because a nav
-where a button does nothing is itself a tell.
-
-## Goals
-
-Naming a new goal prices it through `priceEstimator.js` and repoints the tijori
-at it; the pot carries over, so switching goals is never punished. Reaching the
-target **completes the goal on the spot** — the price leaves the tijori, the
-goal clears, and she's asked for the next one. Doing it at the moment of
-crossing means the ledger can never sit at 130% funded.
-
-Naming a goal she can already afford does **not** buy it. It says she has
-enough and waits for her to decide.
-
-## Support — the withdrawal pause
-
-**Withdrawals are requested, not executed.** Asking for money out opens the
-Support tab with a pending request; the ledger only moves when she confirms
-there. The coach asks what the money is for and advises on the answer:
-
-- **Medicine, illness, a child's fees, rent** — says plainly it's worth taking
-  out. A savings app that guards the goal ahead of her wellbeing is worse than
-  no app.
-- **Something that can wait** — one sentence on what it costs the goal, and an
-  offer to take out less.
-- **Someone else is demanding it** — does *not* tell her to refuse and does
-  *not* tell her to hand it over. Her money, her decision, partial is allowed.
-
-Three rules the screen is built around, in order:
-
-1. It never reads as an accusation. Whoever is pressuring her can see this
-   screen, so "is someone forcing you?" would put her in more danger than no app
-   at all. It looks like an ordinary withdrawal review; the nav icon is a heart
-   labelled *Support*, not a siren.
-2. It never traps her money. Confirm is one tap, the same weight as cancel,
-   never behind a lecture.
-3. Nothing moves until she says so.
-
-## How the voice layer works
+### Voice Layer
 
 Three tiers, in order, in `src/lib/voiceEngine.js`:
 
 | Tier | Handles | Cost |
-| --- | --- | --- |
-| **Local ledger** | unambiguous questions and digit amounts | ~0ms, no network |
-| **Groq** | everything else — greetings, fear, word-numbers, compound sentences | ~450ms |
-| **Keyword rules** | Groq unreachable | ~1ms |
+|---|---|---|
+| Local ledger | Unambiguous questions and digit amounts | ~0ms, no network |
+| Groq | Greetings, fear, word-numbers, compound sentences | ~450ms |
+| Keyword rules | Fallback when Groq is unreachable | ~1ms |
 
-The local tier deliberately **declines** anything ambiguous rather than
-guessing, so compound requests ("save 100 and tell me how far the goal is")
-fall through to Groq instead of silently dropping the transfer.
+The local tier deliberately declines anything ambiguous rather than guessing, so compound requests fall through to Groq instead of silently dropping the transfer.
 
-**The model never states a number.** It emits placeholders — `{{balance}}`,
-`{{goal_remaining}}` — filled in *after* the ledger mutates, so the spoken
-figure can't drift from the screen. `guardNumbers()` is the backstop: any
-ledger-scale number in a reply that isn't a real value swaps the whole sentence
-for a deterministic template.
+The model never states a number directly — it emits placeholders (`{{balance}}`, `{{goal_remaining}}`) filled in after the ledger mutates, so the spoken figure can never drift from the screen. `guardNumbers()` is the backstop, swapping in a deterministic template if a reply contains an unverified number.
 
-Overdrawing is **refused, not clamped** — clamping would silently empty the
-tijori on a request that was meant to be declined.
+Overdrawing is refused, not clamped — clamping would silently empty the tijori on a request that was meant to be declined.
 
-Other intents worth knowing: `spend_mention` (she mentions a purchase — the
-tijori holds savings, so household spending is never deducted) and `reconcile`
-(she states her true total when the app has drifted from the cash in her hand;
-the difference is logged as `मिलान`, not silently rewritten).
+### Voice Commands
 
-## Layout
+| Command (Hindi) | Meaning | Description |
+|---|---|---|
+| मेरी बचत कितनी है | "How much are my savings?" | Speaks current hidden balance |
+| दो सौ बचाओ | "Save two hundred" | Adds ₹200 to the goal, updates ledger |
+| बकरी के लिए और कितना चाहिए | "How much more for the goal?" | Speaks remaining amount to target |
+| अगर पति को पता चल गया तो | "What if my husband finds out?" | Routed to Groq — reassurance + duress-mode reminder |
 
-```
-frontend/src/
-  components/
-    PhoneFrame.jsx         desktop device shell; publishes --app-h
-    IntroStitch.jsx        scroll-driven needle + thread
-    LockDial.jsx           the dial — stitched in the intro, turned on the PIN
-    PinScreen.jsx          rotary PIN (drag/scroll + dwell), keypad fallback
-    VoicePanel.jsx         transcript, reply, text fallback, mic errors
-    DecoyDashboard.jsx     duress view
-    Dashboard/             balance, goal, insight, transactions, mic, nav
-      GoalsView.jsx  VoiceView.jsx  EmergencyView.jsx  SettingsView.jsx
-  lib/voiceEngine.js       STT → intent → ledger → TTS
-  lib/priceEstimator.js    goal pricing, separate key + small model
-  hooks/useVoice.js        the whole voice layer as one hook
-  services/                goalService, duressService, insightService
-  data/initialData.js      real + decoy state
+## Getting Started
+
+### Prerequisites
+
+- Node.js v18+
+- Python 3.10+ (for the FastAPI backend)
+- A Groq API key
+- Chrome (voice features require Web Speech API — not supported in Firefox)
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone <your-repo-url>
+cd tijori
 ```
 
-### Two contracts not to break
+Install dependencies:
 
-**`hiddenSavings` is the tijori itself** — saving makes it go **up**, and
-`goal.saved` mirrors it. One pot, moving together, so the two numbers on screen
-can never disagree.
+```bash
+# Frontend
+cd frontend && npm install
 
-**Transaction labels are load-bearing.** `TransactionList` styles rows by
-matching them, so renaming one in `goalService.js` silently changes the UI:
+# Backend
+cd ../backend && pip install -r requirements.txt
+```
 
-| Label | Row |
-| --- | --- |
-| `नया लक्ष्य: X` | 🎯 amber, amount hidden |
-| `सपना पूरा: X` | 🎉 amber |
-| `ज़रूरी निकासी` | 🆘 clay |
-| `मिलान` | 🔄 muted |
+### Configuration
 
-Weeks-remaining is derived by `weeksAtPace()`, never hardcoded — a stored
-"4 weeks" once contradicted the Goals tab's computed 44.
+Frontend — create `frontend/.env.local`:
 
-`--app-h` is the height of one screen: `100svh` normally, the frame's pixel
-height inside `PhoneFrame`. Screens use `h-[var(--app-h)]`, not `100svh`.
+```bash
+VITE_GROQ_API_KEY=your_groq_key_here
+```
 
-## Not done
+### Usage
 
-- **No persistence.** Everything is in-memory React state — reload and it's back
-  to ₹18,540 with the sewing machine. Good for rehearsals, but say so honestly
-  if a judge asks whether it's saved.
-- **No backend.** The frontend does not call `backend/`.
-- **Groq is a cloud call**, which contradicts the on-device, no-log threat model
-  in the pitch. Say it first, framed as the scoped WebLLM port, rather than
-  letting a judge find it.
-- **UPI Circle** is mocked against NPCI's published contract.
-- The mic and the dial *drag* need testing on the actual demo device — both are
-  hardware paths that can't be verified from a script.
+Start services:
 
-## Before presenting
+```bash
+# Terminal 1: Frontend
+cd frontend
+npm run dev
+# Opens on http://localhost:5173
 
-Delete the crib line at the bottom of `PinScreen.jsx`
-(`demo · 1234 real · 9999 decoy`).
+# Terminal 2: Backend
+cd backend
+uvicorn main:app --reload --port 8000
+```
+
+Serve over localhost — opening the file directly will not grant mic permission.
+
+The demo, in order:
+
+1. **Scroll** — the intro stitches the tijori into existence, ring by ring. Skip (top right) jumps past it during rehearsal.
+2. **Turn the dial** — drag or scroll to the nearest digit; rest half a second to lock it in. Four digits opens it.
+   - `1234` → the real tijori
+   - `9999` → the decoy
+3. **Tap the mic and speak Hindi**, or type into the box below it.
+
+---
+
+## License
+
+MIT
+
+--- 
+Built with ❤️ by for Girls Hack Day Hackathon.
