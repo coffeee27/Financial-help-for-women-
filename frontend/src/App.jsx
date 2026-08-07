@@ -2,10 +2,12 @@ import { useState } from "react";
 import PinScreen from "./components/PinScreen";
 import DataTest from "./components/DataTest";
 import { checkPIN } from "./services/duressService";
+import AIChat from "./components/AIChat";
 
 export default function App() {
 
   const [screen, setScreen] = useState("pin");
+  
 
   const unlock = (pin)=>{
 
@@ -34,12 +36,11 @@ else{
 
   if (screen === "real") {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
-
-      <DataTest />
-
+     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
+      <AIChat />
     </div>
   );
+  
 
 
 
