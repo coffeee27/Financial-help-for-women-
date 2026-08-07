@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { goalProgress } from "../../services/goalService";
+import { goalProgress, weeksAtPace } from "../../services/goalService";
 
-export default function GoalCard({ goal }) {
+export default function GoalCard({ goal, state }) {
   if (!goal) return null;
   const pct = goalProgress(goal);
+  const weeks = weeksAtPace(state);
 
   return (
     <motion.div
@@ -60,8 +61,8 @@ export default function GoalCard({ goal }) {
             </div>
           </div>
         </div>
-        {goal.weeksRemaining ? (
-          <span className="deva text-[12px] text-bark-500">~{goal.weeksRemaining} हफ्ते</span>
+        {weeks ? (
+          <span className="deva text-[12px] text-bark-500">~{weeks} हफ्ते</span>
         ) : null}
       </div>
     </motion.div>

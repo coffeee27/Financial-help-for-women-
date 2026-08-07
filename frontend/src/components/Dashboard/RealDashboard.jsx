@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useFinance } from "../../context/FinanceContext";
 import { useVoice } from "../../hooks/useVoice";
 import BalanceCard from "./BalanceCard";
@@ -8,16 +8,31 @@ import InsightCard from "./InsightCard";
 import TransactionList from "./TransactionList";
 import MicButton from "./MicButton";
 import BottomNav from "./BottomNav";
+import GoalsView from "./GoalsView";
+import VoiceView from "./VoiceView";
+import SettingsView from "./SettingsView";
 import VoicePanel from "../VoicePanel";
+
+const TITLES = {
+  goals: { hi: "लक्ष्य", en: "Goals" },
+  voice: { hi: "आवाज़", en: "Voice" },
+  settings: { hi: "सेटिंग्स", en: "Settings" },
+};
 
 export default function RealDashboard({ onLock }) {
   const { state, setState } = useFinance();
   const voice = useVoice(state, setState);
   const [tab, setTab] = useState("home");
+  const scrollRef = useRef(null);
+
+  const changeTab = (next) => {
+    setTab(next);
+    scrollRef.current?.scrollTo({ top: 0 });
+  };
 
   return (
     <div className="h-[100svh] overflow-hidden flex flex-col bg-sand-200 paper">
-      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-9 pb-6 max-w-md w-full mx-auto">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar px-5 pt-9 pb-6 max-w-md w-full mx-auto">
         <motion.header
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -25,10 +40,23 @@ export default function RealDashboard({ onLock }) {
           className="flex items-center justify-between mb-7"
         >
           <div>
-            <p className="deva text-[13px] text-bark-500">{state.user.greeting}</p>
-            <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
-              {state.user.name}
-            </h1>
+            {tab === "home" ? (
+              <>
+                <p className="deva text-[13px] text-bark-500">{state.user.greeting}</p>
+                <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
+                  {state.user.name}
+                </h1>
+              </>
+            ) : (
+              <>
+                <p className="text-[10px] tracking-[.26em] uppercase text-bark-500">
+                  {TITLES[tab].en}
+                </p>
+                <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
+                  {TITLES[tab].hi}
+                </h1>
+              </>
+            )}
           </div>
           <button
             onClick={onLock}
@@ -45,31 +73,56 @@ export default function RealDashboard({ onLock }) {
           </button>
         </motion.header>
 
-        <div className="space-y-4">
-          <BalanceCard amount={state.hiddenSavings} weekDelta={state.weekDelta} />
-          <GoalCard goal={state.goal} />
-          <InsightCard state={state} />
-          <TransactionList transactions={state.transactions} />
-        </div>
+        {/* Keyed enter animation, deliberately NOT wrapped in AnimatePresence.
+            Nesting one inside App's AnimatePresence mode="wait" deadlocked the
+            exit: the outer one waited for this dashboard to leave, the inner
+            one never released presence, and the lock button silently stopped
+            working. No exit needed here — tabs only ever swap. */}
+        <div key={tab}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {tab === "home" && (
+              <>
+                <div className="space-y-4">
+                  <BalanceCard amount={state.hiddenSavings} weekDelta={state.weekDelta} />
+                  <GoalCard goal={state.goal} state={state} />
+                  <InsightCard state={state} />
+                  <TransactionList transactions={state.transactions} />
+                </div>
 
-        <div className="mt-9 flex flex-col items-center gap-3.5">
-          <MicButton
-            listening={voice.listening}
-            thinking={voice.thinking}
-            onTap={voice.start}
-            disabled={voice.thinking}
-          />
-          <p className="deva text-[12.5px] text-bark-500 text-center">
-            {voice.listening ? "सुन रही हूँ…" : voice.thinking ? "सोच रही हूँ…" : "बोलने के लिए दबाइए"}
-          </p>
-        </div>
+                <div className="mt-9 flex flex-col items-center gap-3.5">
+                  <MicButton
+                    listening={voice.listening}
+                    thinking={voice.thinking}
+                    onTap={voice.start}
+                    disabled={voice.thinking}
+                  />
+                  <p className="deva text-[12.5px] text-bark-500 text-center">
+                    {voice.listening
+                      ? "सुन रही हूँ…"
+                      : voice.thinking
+                      ? "सोच रही हूँ…"
+                      : "बोलने के लिए दबाइए"}
+                  </p>
+                </div>
 
-        <div className="mt-5">
-          <VoicePanel voice={voice} />
+                <div className="mt-5">
+                  <VoicePanel voice={voice} />
+                </div>
+              </>
+            )}
+
+            {tab === "goals" && <GoalsView state={state} />}
+            {tab === "voice" && <VoiceView voice={voice} />}
+            {tab === "settings" && <SettingsView onLock={onLock} />}
+          </motion.div>
         </div>
       </div>
 
-      <BottomNav active={tab} onChange={setTab} />
+      <BottomNav active={tab} onChange={changeTab} />
     </div>
   );
 }

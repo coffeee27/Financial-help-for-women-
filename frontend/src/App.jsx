@@ -28,41 +28,54 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  /* Only the intro and the PIN sit inside AnimatePresence — they are the two
+   * screens that need to animate *out*.
+   *
+   * The dashboards deliberately do not. They contain a keyed subtree that
+   * remounts on every tab switch, and remounting inside a tree that
+   * AnimatePresence is waiting on leaves stale presence registrations: the
+   * exit never resolves, so mode="wait" never mounts the next screen and the
+   * lock button silently stops working once you have changed tabs. They only
+   * ever need to appear, so plain conditional rendering is both correct and
+   * one less thing to deadlock.
+   */
   return (
-    <AnimatePresence mode="wait">
-      {screen === "intro" && (
-        <motion.div key="intro" exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-          <IntroStitch onUnlocked={toPin} />
-        </motion.div>
-      )}
+    <>
+      <AnimatePresence mode="wait">
+        {screen === "intro" && (
+          <motion.div key="intro" exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+            <IntroStitch onUnlocked={toPin} />
+          </motion.div>
+        )}
 
-      {/* barely moves — the dial is the same object the intro just stitched,
-          so a big scale jump would break the illusion of continuity */}
-      {screen === "pin" && (
-        <motion.div
-          key="pin"
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.03 }}
-          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <PinScreen onUnlock={unlock} />
-        </motion.div>
-      )}
+        {/* barely moves — the dial is the same object the intro just stitched,
+            so a big scale jump would break the illusion of continuity */}
+        {screen === "pin" && (
+          <motion.div
+            key="pin"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.03 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <PinScreen onUnlock={unlock} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {screen === "real" && (
-        <motion.div key="real" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
           <RealDashboard onLock={lock} />
         </motion.div>
       )}
 
       {screen === "decoy" && (
-        <motion.div key="decoy" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
           <DecoyDashboard onLock={lock} />
         </motion.div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

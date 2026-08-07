@@ -43,3 +43,14 @@ export function goalProgress(goal) {
   if (!goal || !goal.target) return 0;
   return Math.min(100, Math.round((goal.saved / goal.target) * 100));
 }
+
+/* Weeks left, derived from what's actually missing and what she can actually
+ * put aside. Never hardcode this: the seed data carried a "4 weeks" that the
+ * Goals tab then contradicted with 44, because ₹6,460 at ₹150/week is 44. One
+ * source, so every screen agrees. */
+export function weeksAtPace(state) {
+  if (!state.goal || !state.safeToSave) return null;
+  const remaining = Math.max(0, state.goal.target - state.goal.saved);
+  if (remaining === 0) return 0;
+  return Math.ceil(remaining / state.safeToSave);
+}

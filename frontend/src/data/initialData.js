@@ -18,7 +18,8 @@ export const realData = {
     nameEn: "Own tailoring machine",
     target: 25000,
     saved: 18540,
-    weeksRemaining: 4,
+    // no weeksRemaining here on purpose — it is derived from the gap and her
+    // safe-to-save pace via weeksAtPace(), so every screen shows one number
   },
   transactions: [
     { id: 1, type: "save", amount: 200, label: "साप्ताहिक बचत", date: "आज" },
