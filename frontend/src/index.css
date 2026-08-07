@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Height of one app screen. Full viewport normally; PhoneFrame overrides it
+     with the device's real pixel height so screens fit the frame, not the tab. */
+  :root {
+    --app-h: 100svh;
+  }
   html {
     -webkit-tap-highlight-color: transparent;
   }

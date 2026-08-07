@@ -157,7 +157,7 @@ export default function PinScreen({ onUnlock }) {
   };
 
   return (
-    <div className="h-[100svh] overflow-hidden bg-sand-200 relative flex flex-col items-center justify-center px-6">
+    <div className="h-[var(--app-h)] overflow-hidden bg-sand-200 relative flex flex-col items-center justify-center px-6">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,#FFFCF7_0%,#F5EFE6_52%,#E8DCCB_100%)]" />
       <div
         className="absolute inset-0 opacity-[.5] mix-blend-multiply"

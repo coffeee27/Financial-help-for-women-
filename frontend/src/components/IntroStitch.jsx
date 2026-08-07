@@ -35,17 +35,27 @@ export default function IntroStitch({ onUnlocked }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    /* Inside PhoneFrame the page doesn't scroll — the device does. Follow that
+       element when it exists, and fall back to the window otherwise, so the
+       same component works framed and full-screen. */
+    const scroller = el.closest("[data-app-scroll]");
+
     const measure = () => {
       const rect = el.getBoundingClientRect();
-      const travel = rect.height - window.innerHeight;
+      const viewH = scroller ? scroller.clientHeight : window.innerHeight;
+      const top = scroller ? rect.top - scroller.getBoundingClientRect().top : rect.top;
+      const travel = rect.height - viewH;
       if (travel <= 0) return raw.set(0);
-      raw.set(Math.min(Math.max(-rect.top / travel, 0), 1));
+      raw.set(Math.min(Math.max(-top / travel, 0), 1));
     };
+
     measure();
-    window.addEventListener("scroll", measure, { passive: true });
+    const target = scroller || window;
+    target.addEventListener("scroll", measure, { passive: true });
     window.addEventListener("resize", measure);
     return () => {
-      window.removeEventListener("scroll", measure);
+      target.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
   }, [raw]);
@@ -118,8 +128,8 @@ export default function IntroStitch({ onUnlocked }) {
   });
 
   return (
-    <section ref={ref} className="relative h-[380vh] bg-sand-200">
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
+    <section ref={ref} className="relative h-[calc(var(--app-h)*3.8)] bg-sand-200">
+      <div className="sticky top-0 h-[var(--app-h)] overflow-hidden">
         {/* woven cloth */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,#FFFCF7_0%,#F5EFE6_48%,#E8DCCB_100%)]" />
         <div

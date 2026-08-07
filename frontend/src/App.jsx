@@ -7,6 +7,13 @@ import DecoyDashboard from "./components/DecoyDashboard";
 import { useFinance } from "./context/FinanceContext";
 import { resetHistory } from "./lib/voiceEngine";
 
+/* Framed on desktop the page never scrolls — the device does. */
+function scrollAppToTop() {
+  const scroller = document.querySelector("[data-app-scroll]");
+  if (scroller) scroller.scrollTo({ top: 0 });
+  else window.scrollTo(0, 0);
+}
+
 export default function App() {
   const [screen, setScreen] = useState("intro"); // intro → pin → real | decoy
   const { setMode } = useFinance();
@@ -14,7 +21,7 @@ export default function App() {
   const unlock = (mode) => {
     setMode(mode);
     setScreen(mode);
-    window.scrollTo(0, 0);
+    scrollAppToTop();
   };
 
   const lock = () => {
@@ -25,7 +32,7 @@ export default function App() {
 
   const toPin = () => {
     setScreen("pin");
-    window.scrollTo(0, 0);
+    scrollAppToTop();
   };
 
   /* Only the intro and the PIN sit inside AnimatePresence — they are the two

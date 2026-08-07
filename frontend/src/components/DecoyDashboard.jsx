@@ -51,7 +51,7 @@ export default function DecoyDashboard({ onLock }) {
   };
 
   return (
-    <div className="h-[100svh] overflow-hidden flex flex-col bg-sand-200 paper">
+    <div className="h-[var(--app-h)] overflow-hidden flex flex-col bg-sand-200 paper">
       <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar px-5 pt-9 pb-6 max-w-md w-full mx-auto">
         <motion.header
           initial={{ opacity: 0, y: -10 }}
