@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useTransform, useSpring, useMotionValueEvent } from "framer-motion";
-import LockDial from "./LockDial";
+import LockDial, { STITCH_COUNTS } from "./LockDial";
 
 /* The intro.
  *
@@ -55,11 +55,32 @@ export default function IntroStitch({ onUnlocked }) {
     [0, 0, 360, 720, 1080, 1120]
   );
   // 0 → bezel ring, 22 → face ring, 114 → hub
-  const needleY = useTransform(
+  const needleRing = useTransform(
     p,
     [0, 0.36, 0.38, 0.6, 0.62, 0.95],
     [0, 0, 22, 22, 114, 114]
   );
+
+  /* One dip per stitch.
+   *
+   * A running stitch is only on top of the cloth for the dash — the needle
+   * then goes under and travels the gap out of sight before coming up again.
+   * So this is a sawtooth over each stitch: visible while laying the dash,
+   * plunging at the end of it, hidden underneath, surfacing for the next one.
+   * Without this the needle just glides round at a constant height, which is
+   * what made it look like it was spinning on a point rather than sewing.
+   */
+  const stitchPhase = useTransform(needleAngle, (a) => {
+    const lap = Math.max(0, Math.min(STITCH_COUNTS.length - 1, Math.floor(a / 360)));
+    const per = 360 / STITCH_COUNTS[lap];
+    return (((a % per) + per) % per) / per;   // 0→1 across a single stitch
+  });
+
+  //                        lay the dash │ plunge │ under │ surface
+  const dipScale = useTransform(stitchPhase, [0, 0.5, 0.62, 0.88, 1], [1, 1, 0.42, 0.46, 1]);
+  const dipFade = useTransform(stitchPhase, [0, 0.5, 0.64, 0.86, 1], [1, 1, 0.12, 0.16, 1]);
+  // sinks toward the cloth as it goes in, lifts back out
+  const dipDepth = useTransform(stitchPhase, [0, 0.5, 0.65, 0.87, 1], [0, 0, 5, 5, 0]);
   const needleOpacity = useTransform(p, [0, 0.03, 0.9, 0.97], [0, 1, 1, 0]);
 
   const dialScale = useTransform(p, [0, 0.95], [0.92, 1]);
@@ -121,22 +142,32 @@ export default function IntroStitch({ onUnlocked }) {
               <motion.g
                 style={{ rotate: needleAngle, transformOrigin: "200px 200px", transformBox: "view-box" }}
               >
-                {/* sits on the ring being sewn; needleY walks it inward */}
-                <motion.g style={{ y: needleY }}>
-                  <g transform="translate(200, 26)">
-                    {/* thread, running back along the seam it just laid —
-                        short and anchored, so it reads as attached to cloth
-                        rather than a stray line floating across the screen */}
-                    <path
-                      d="M-12 0.8 C -22 2.4, -30 4.4, -38 8"
-                      stroke="#B4532A" strokeWidth="1.5" fill="none"
-                      strokeLinecap="round" opacity=".75"
-                    />
-                    {/* needle, lying along the direction of travel */}
-                    <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 1.2 L-8 1.7 Z" fill="#8A8177" />
-                    <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 0 Z" fill="#DCD6CB" />
-                    <ellipse cx="-10.2" cy="0" rx="2" ry="0.8" fill="#F5EFE6" />
-                  </g>
+                {/* sits on the ring being sewn; needleRing walks it inward */}
+                <motion.g style={{ y: needleRing }}>
+                  {/* the thread stays on the surface — only the needle dives */}
+                  <path
+                    d="M188 26.8 C 178 28.4, 170 30.4, 162 34"
+                    stroke="#B4532A" strokeWidth="1.5" fill="none"
+                    strokeLinecap="round" opacity=".75"
+                  />
+                  {/* needle, lying along the direction of travel, dipping
+                      through the cloth once per stitch */}
+                  <motion.g
+                    data-needle
+                    style={{
+                      y: dipDepth,
+                      scale: dipScale,
+                      opacity: dipFade,
+                      transformOrigin: "200px 26px",
+                      transformBox: "view-box",
+                    }}
+                  >
+                    <g transform="translate(200, 26)">
+                      <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 1.2 L-8 1.7 Z" fill="#8A8177" />
+                      <path d="M16 0 L-8 -1.7 L-13 -1.2 L-13 0 Z" fill="#DCD6CB" />
+                      <ellipse cx="-10.2" cy="0" rx="2" ry="0.8" fill="#F5EFE6" />
+                    </g>
+                  </motion.g>
                 </motion.g>
               </motion.g>
             </motion.svg>

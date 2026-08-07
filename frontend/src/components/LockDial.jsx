@@ -222,4 +222,8 @@ export default function LockDial({ reveal, rotation, tumblers = 0, live = false 
   );
 }
 
-export { DIGITS, STEP };
+/* How many stitches are in each lap. The intro needs these so its needle can
+ * dip once per stitch instead of gliding round at a constant height. */
+const STITCH_COUNTS = [BEZEL_STITCHES.length, FACE_STITCHES.length, HUB_STITCHES.length];
+
+export { DIGITS, STEP, STITCH_COUNTS };
