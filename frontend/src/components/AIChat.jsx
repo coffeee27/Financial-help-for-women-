@@ -25,7 +25,7 @@ export default function AIChat() {
   const [voiceReplyEnabled, setVoiceReplyEnabled] = useState(true);
   const { t, i18n } = useTranslation();
   const scrollRef = useRef(null);
-  const reply = await sendMessage(textToSend, historyForApi, i18n.language);
+ 
 
   const {
     transcript,
@@ -80,7 +80,11 @@ export default function AIChat() {
       setIsLoading(true);
 
       try {
-        const reply = await sendMessage(textToSend, historyForApi);
+        const reply = await sendMessage(
+  textToSend,
+  historyForApi,
+  i18n.language
+);
 
         const assistantMessage = {
           role: "assistant",
