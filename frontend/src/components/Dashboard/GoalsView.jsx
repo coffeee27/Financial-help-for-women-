@@ -44,13 +44,13 @@ export default function GoalsView({ state }) {
               stroke="#B4532A" strokeWidth="14" strokeLinecap="round"
               strokeDasharray={C}
               initial={{ strokeDashoffset: C }}
-              animate={{ strokeDashoffset: C * (1 - pct / 100) }}
+              animate={{ strokeDashoffset: C * (1 - Math.min(pct, 100) / 100) }}
               transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="font-display text-[40px] leading-none font-semibold text-bark-900 tnum">
-              {pct}
+              {Math.min(pct, 100)}
               <span className="text-lg text-bark-500">%</span>
             </span>
             <span className="deva text-[12px] text-bark-500 mt-1">पूरा हुआ</span>
@@ -73,7 +73,22 @@ export default function GoalsView({ state }) {
         </div>
       </motion.div>
 
-      {weeks !== null && (
+      {pct >= 100 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-5xl bg-gradient-to-r from-amber-400 to-orange-400 p-5 text-center shadow-md"
+        >
+          <div className="text-3xl mb-2">🎉</div>
+          <p className="deva text-[15px] font-semibold text-white leading-snug">
+            सपना पूरा! अब बोलिए<br />
+            <span className="font-normal opacity-90">"मैंने {goal.name} ले ली"</span>
+          </p>
+        </motion.div>
+      )}
+
+      {weeks !== null && pct < 100 && (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
