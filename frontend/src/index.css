@@ -2,13 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f7f7fb;
-  color: #1f2937;
+@layer base {
+  /* Height of one app screen. Full viewport normally; PhoneFrame overrides it
+     with the device's real pixel height so screens fit the frame, not the tab. */
+  :root {
+    --app-h: 100svh;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-sand-200 text-bark-900 antialiased;
+  }
+  /* Devanagari needs a face that actually has the glyphs, or Hindi renders as
+     tofu boxes on Windows — the one thing that would sink a Hindi demo. */
+  .deva {
+    font-family: "Noto Sans Devanagari", "Nirmala UI", Inter, sans-serif;
+  }
 }
 
-* {
-  box-sizing: border-box;
+@layer utilities {
+  /* Paper tooth. Keeps the large cream areas from looking like flat #FFF. */
+  .paper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

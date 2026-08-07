@@ -1,39 +1,27 @@
-import {createContext,useContext,useState} from "react";
-import {initialFinanceData} from "../data/initialData";
+import { createContext, useContext, useMemo, useState } from "react";
+import { realData, decoyData } from "../data/initialData";
 
+const FinanceContext = createContext(null);
 
-const FinanceContext=createContext();
+export function FinanceProvider({ children }) {
+  const [mode, setMode] = useState(null);          // null | "real" | "decoy"
+  const [real, setReal] = useState(realData);
+  const [decoy, setDecoy] = useState(decoyData);
 
+  const value = useMemo(() => {
+    const state = mode === "decoy" ? decoy : real;
+    const setState = mode === "decoy" ? setDecoy : setReal;
+    return {
+      mode, setMode, state, setState,
+      reset: () => { setReal(realData); setDecoy(decoyData); setMode(null); },
+    };
+  }, [mode, real, decoy]);
 
-export function FinanceProvider({children}){
-
-
-const [finance,setFinance]=useState(initialFinanceData);
-
-
-return (
-
-<FinanceContext.Provider
-
-value={{
-    finance,
-    setFinance
-}}
-
->
-
-{children}
-
-</FinanceContext.Provider>
-
-);
-
-
+  return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;
 }
 
-
-export function useFinance(){
-
-return useContext(FinanceContext);
-
+export function useFinance() {
+  const ctx = useContext(FinanceContext);
+  if (!ctx) throw new Error("useFinance must be used inside <FinanceProvider>");
+  return ctx;
 }
