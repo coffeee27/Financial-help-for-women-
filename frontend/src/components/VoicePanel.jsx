@@ -1,11 +1,44 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-/* Transcript, spoken reply, and the text fallback.
+/* Transcript, spoken reply, the text fallback — and, critically, why the mic
+ * failed when it does.
  *
- * The fallback box is not a nicety — if the venue is loud or the mic
- * permission prompt misfires, this is what keeps the demo alive.
+ * A dead mic with no message looks like a broken app on stage. It is almost
+ * always a denied permission, which is recoverable in ten seconds if the
+ * screen actually says so.
  */
+
+const MIC_ERRORS = {
+  "no-stt": {
+    hi: "इस ब्राउज़र में माइक काम नहीं करता।",
+    en: "Speech recognition needs Chrome or Edge. Type below instead.",
+  },
+  "not-allowed": {
+    hi: "माइक की अनुमति नहीं मिली।",
+    en: "Click the padlock in the address bar → Site settings → Microphone → Allow, then reload. A dismissed prompt counts as blocked.",
+  },
+  "service-not-allowed": {
+    hi: "माइक की अनुमति नहीं मिली।",
+    en: "Speech service blocked. Check the padlock in the address bar → Microphone → Allow.",
+  },
+  "audio-capture": {
+    hi: "माइक नहीं मिला।",
+    en: "No microphone detected. Check it's plugged in and not claimed by another app.",
+  },
+  "no-speech": {
+    hi: "कोई आवाज़ नहीं सुनाई दी। दोबारा बोलिए।",
+    en: "Nothing heard — tap and speak a little sooner.",
+  },
+  network: {
+    hi: "आवाज़ पहचानने की सेवा तक नहीं पहुँच पाई।",
+    en: "Chrome sends audio to Google to transcribe — this needs internet. Type below if the venue wifi is down.",
+  },
+  aborted: { hi: "सुनना रुक गया।", en: "Recognition aborted — tap the mic again." },
+  "already-running": { hi: "पहले से सुन रहा था।", en: "Recogniser was still running — tap again." },
+  "start-failed": { hi: "माइक शुरू नहीं हो पाया।", en: "Could not start recognition — tap again." },
+};
+
 export default function VoicePanel({ voice }) {
   const [text, setText] = useState("");
 
@@ -23,8 +56,32 @@ export default function VoicePanel({ voice }) {
     rules: "keyword rules",
   };
 
+  const err = voice.error ? MIC_ERRORS[voice.error] : null;
+  const blocked = voice.micPermission === "denied";
+
   return (
     <div className="space-y-3">
+      {/* permission trouble, shown before she even taps */}
+      {(blocked || err) && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-3xl border border-clay-400/50 bg-clay-500/[.07] px-5 py-3.5"
+        >
+          <p className="deva text-[14px] text-clay-600 font-medium">
+            {err ? err.hi : "माइक की अनुमति बंद है।"}
+          </p>
+          <p className="text-[11.5px] text-bark-500 mt-1 leading-relaxed">
+            {err
+              ? err.en
+              : "Microphone is blocked for this site. Padlock in the address bar → Site settings → Microphone → Allow, then reload."}
+          </p>
+          {voice.error && !MIC_ERRORS[voice.error] && (
+            <p className="text-[10px] text-bark-300 mt-1.5 font-mono">code: {voice.error}</p>
+          )}
+        </motion.div>
+      )}
+
       <AnimatePresence mode="popLayout">
         {voice.transcript && (
           <motion.div
@@ -81,12 +138,6 @@ export default function VoicePanel({ voice }) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {voice.error === "no-stt" && (
-        <p className="deva text-[12.5px] text-clay-500">
-          इस ब्राउज़र में माइक काम नहीं करता — नीचे लिखकर भेजिए।
-        </p>
-      )}
 
       <form onSubmit={submit} className="flex gap-2">
         <input
