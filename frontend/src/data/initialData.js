@@ -16,7 +16,7 @@ export const realData = {
   goal: {
     id: 1,
     name: "goals.sewingMachine",
-    nameEn: "Own tailoring machine",
+    nameEn: "अपनी सिलाई मशीन",
     target: 25000,
     saved: 18540,
   },

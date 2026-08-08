@@ -20,7 +20,7 @@ const TIMEOUT_MS = 7000;
 /* Offline floor. If the API is unreachable at the venue, a sensible number is
  * far better than a broken goal card. Keys are matched loosely. */
 const FALLBACK = [
-  [/सिलाई|silai|sewing|tailor/i, "सिलाई मशीन", "Sewing machine", 25000],
+  [/सिलाई|silai|sewing|tailor/i, "सिलाई मशीन", "सिलाई मशीन", 25000],
   [/फ्रिज|फ़्रिज|fridge|refrigerator/i, "फ्रिज", "Refrigerator", 18000],
   [/बकरी|bakri|goat/i, "बकरी", "Goat", 8000],
   [/साइकिल|cycle|bicycle/i, "साइकिल", "Bicycle", 6000],
