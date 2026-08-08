@@ -92,13 +92,13 @@ export default function GoalsView({ state }) {
         }}
         className="rounded-5xl bg-sand-50 shadow-card border border-sand-300/60 p-7 text-center"
       >
-<<<<<<< HEAD
+
         <div className="text-[10px] tracking-[.26em] uppercase text-bark-500">Dream Goal</div>
         <h2 className="deva mt-2 text-[24px] leading-tight font-semibold text-bark-900">
           {goal.name}
         </h2>
-=======
->>>>>>> 29501fd63e6041c208d25a0c7dd3ef5cda6c1744
+
+29501fd63e6041c208d25a0c7dd3ef5cda6c1744
 
         {/* Title */}
         <div className="text-[10px] tracking-[.26em] uppercase text-bark-500">

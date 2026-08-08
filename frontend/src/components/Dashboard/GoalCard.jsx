@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { goalProgress, weeksAtPace } from "../../services/goalService";
 import { useTranslation } from "react-i18next";
@@ -59,13 +58,6 @@ export default function GoalCard({ goal, state }) {
           <h3 className="deva mt-2 text-[22px] leading-tight font-semibold text-bark-900">
             {goalName}
           </h3>
-<<<<<<< HEAD
-=======
-
-          {/* Show English subtitle only in Hindi mode */}
-         
-          
->>>>>>> 29501fd63e6041c208d25a0c7dd3ef5cda6c1744
         </div>
 
         <motion.div
@@ -139,4 +131,3 @@ export default function GoalCard({ goal, state }) {
     </motion.div>
   );
 }
-
