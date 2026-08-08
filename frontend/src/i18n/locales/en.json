@@ -15,7 +15,9 @@
     "addGoal": "Add Goal",
     "insights": "Insights",
     "savingsTip": "You could safely save ₹{{amount}} this week",
-    "transactions": "Recent Transactions"
+    "transactions": "Recent Transactions",
+    "hiddenSavings": "Hidden Savings",
+"weekSaving": "₹{{amount}} saved this week"
   },
   "chat": {
     "title": "Financial Assistant",
@@ -39,5 +41,115 @@
     "label": "Language",
     "english": "English",
     "hindi": "हिन्दी"
+  },
+  "goals": {
+  "title": "Dream Goal",
+   "sewingMachine": "Own tailoring machine",
+  "noGoal": "No goal yet",
+  "addDream": "Add Dream Goal",
+  "saved": "Saved",
+  "needed": "Still needed",
+  "completed": "Completed",
+    "target": "Target",
+   "prompt": "Start saving towards something meaningful",
+  "contributions": "Contributions",
+  "weeks": "weeks",
+  "thisWeek": "this week",
+   "selectDream": "Choose your dream goal",
+   "paceTitle": "At this pace",
+"paceMessage": "Saving ₹{{amount}} every week, you'll reach {{goal}} in about {{weeks}} weeks.",
+"completedMessage": "I got my {{goal}}!"
+},
+"voice": {
+  "title": "Voice Coach",
+  "try": "Try saying",
+  "speak": "Speak naturally — no reading required",
+  "listening": "Listening...",
+  "thinking": "Thinking...",
+
+  "suggestions": {
+    "save": "How much have I saved?",
+    "saveEn": "How much have I saved?",
+
+    "twoHundred": "Save ₹200",
+    "twoHundredEn": "Save ₹200",
+
+    "goal": "How much more for the goal?",
+    "goalEn": "How much more for the goal?",
+
+    "private": "What if someone finds out?",
+    "privateEn": "What if someone finds out?"
   }
+},
+"tabs":{
+  "goals":"Goals",
+  "voice":"Voice",
+  "emergency":"Support",
+  "settings":"Settings"
+},
+"settings": {
+  "privacy": "Privacy",
+  "silentTransactions": "Silent Transactions",
+  "silentTransactionsSub": "No SMS, no notifications",
+  "hiddenAccount": "Hidden Account",
+  "hiddenAccountSub": "Visible only behind your PIN",
+  "secondPin": "Second PIN",
+  "secondPinSub": "Opens a separate screen under pressure",
+  "hideApp": "Hide App Name",
+  "hideAppSub": "Simple name on home screen",
+
+  "voiceLanguage": "Voice & Language",
+  "language": "Language",
+  "currentLanguage": "English",
+  "offlineCoach": "On-device Thinking Coach",
+  "offlineCoachSub": "No internet, no recordings",
+  "languages": "22 Languages",
+  "languagesSub": "Powered through Bhashini",
+
+  "roadmap": "Roadmap",
+  "on": "ON",
+  "off": "OFF",
+
+  "lock": "Lock Tijori"
+},
+"home": {
+  "welcome": "Welcome back",
+  "savings": "Hidden Savings",
+  "thisWeek": "this week",
+  "speak": "Press to speak",
+  "listening": "Listening...",
+  "thinking": "Thinking..."
+},
+
+  "transactions": {
+    "recent": "Recent Transactions",
+    "weeklySaving": "Weekly Saving",
+    "tailoringWork": "Tailoring Work",
+    "vegetables": "Vegetables",
+    "groceries": "Groceries"
+  },
+
+  "dates": {
+    "today": "Today",
+    "threeDaysAgo": "3 days ago",
+    "lastWeek": "Last week",
+    "yesterday": "Yesterday",
+  "fourDaysAgo": "4 days ago"
+  },
+
+
+ 
+"insight": {
+  "thisWeek": "This week",
+   "safeSave": "You can safely save ₹{{amount}} this week.",
+    "remaining": "₹{{remaining}} left to reach your goal — about {{weeks}} weeks.",
+    "remainingNoWeeks": "₹{{remaining}} left to reach your goal.",
+  "noGoal": "You don't have a goal this week.",
+  "goalWeeks": "₹{{remaining}} more needed to reach your goal — about {{weeks}} weeks.",
+  "goalRemaining": "₹{{remaining}} more needed to reach your goal."
+},
+"greetings": {
+  "evening": "Good evening"
+}
+
 }

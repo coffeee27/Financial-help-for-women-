@@ -14,19 +14,17 @@ import SettingsView from "./SettingsView";
 import EmergencyView from "./EmergencyView";
 import GrowthCard from "./GrowthCard";
 import VoicePanel from "../VoicePanel";
+import LanguageToggle from "../LanguageToggle";
+import { useTranslation } from "react-i18next";
 
-const TITLES = {
-  goals: { hi: "लक्ष्य", en: "Goals" },
-  voice: { hi: "आवाज़", en: "Voice" },
-  emergency: { hi: "सोच लीजिए", en: "Support" },
-  settings: { hi: "सेटिंग्स", en: "Settings" },
-};
+
 
 export default function RealDashboard({ onLock }) {
   const { state, setState } = useFinance();
   const voice = useVoice(state, setState);
   const [tab, setTab] = useState("home");
   const scrollRef = useRef(null);
+  const { t, i18n } = useTranslation();
 
   const changeTab = (next) => {
     setTab(next);
@@ -55,7 +53,9 @@ export default function RealDashboard({ onLock }) {
           <div>
             {tab === "home" ? (
               <>
-                <p className="deva text-[13px] text-bark-500">{state.user.greeting}</p>
+                <p className="deva text-[13px] text-bark-500">
+  {t("dashboard.greeting")}
+</p>
                 <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
                   {state.user.name}
                 </h1>
@@ -63,14 +63,16 @@ export default function RealDashboard({ onLock }) {
             ) : (
               <>
                 <p className="text-[10px] tracking-[.26em] uppercase text-bark-500">
-                  {TITLES[tab].en}
+                  {t(`tabs.${tab}`)}
                 </p>
                 <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
-                  {TITLES[tab].hi}
+                {t(`tabs.${tab}`)}
                 </h1>
               </>
             )}
           </div>
+          <div className="flex items-center gap-2"></div>
+          <LanguageToggle />
           <button
             onClick={onLock}
             className="w-11 h-11 rounded-full bg-sand-50 shadow-card border border-sand-300/70
@@ -116,10 +118,10 @@ export default function RealDashboard({ onLock }) {
                   />
                   <p className="deva text-[12.5px] text-bark-500 text-center">
                     {voice.listening
-                      ? "सुन रही हूँ…"
-                      : voice.thinking
-                      ? "सोच रही हूँ…"
-                      : "बोलने के लिए दबाइए"}
+ ? t("home.listening")
+ : voice.thinking
+ ? t("home.thinking")
+ : t("home.speak")}
                   </p>
                 </div>
 
