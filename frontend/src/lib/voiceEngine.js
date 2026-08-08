@@ -15,6 +15,7 @@ import {
   changeGoal, accomplishGoal, isGoalAchieved,
 } from "../services/goalService";
 import { estimatePrice as estimatePriceAPI } from "./priceEstimator";
+import { projectGrowth } from "../services/growthService";
 
 /* Key comes from .env.local (gitignored) so it never lands in the repo —
  * scrapers watch public commits for `gsk_` and Groq revokes on detection,
@@ -139,13 +140,14 @@ CURRENT LEDGER (facts, never guess beyond these):
 - safe-to-save this week: ${state.safeToSave} rupees${pendingBlock}
 
 YOU REPLY WITH JSON ONLY:
-{ "intent": one of ["get_balance","save_goal","save_no_amount","withdraw","withdraw_advice","emergency_consult","emergency_withdraw","spend_mention","reconcile","goal_progress","safe_to_save","set_goal","goal_achieved","reassure","smalltalk","unknown"],
+{ "intent": one of ["get_balance","save_goal","save_no_amount","withdraw","withdraw_advice","emergency_consult","emergency_withdraw","spend_mention","reconcile","goal_progress","safe_to_save","set_goal","goal_achieved","grow_money","reassure","smalltalk","unknown"],
   "amount": integer or null, "goal_name": string or null, "goal_target": integer or null, "reply": "Hindi sentence", "confidence": 0.0-1.0 }
 
 RULES FOR "reply":
 1. Hindi, Devanagari, spoken register. One or two short sentences — it is read aloud, so no lists, no markdown.
 2. NEVER write a literal number from the ledger. Use placeholders, substituted after you reply:
    {{balance}} {{goal_name}} {{goal_saved}} {{goal_target}} {{goal_remaining}} {{safe_to_save}} {{amount}}
+   and, for grow_money only: {{grow_savings}} {{grow_1yr}} {{grow_gain}} {{grow_rate}} {{grow_with_weekly}}
    The values are ALREADY POST-TRANSACTION — do not add, subtract or recompute anything. If the deposit just happened, {{goal_saved}} already includes it. Never do arithmetic; you will get it wrong and contradict her screen.
    The only number you may write literally is one SHE just said.
    {{goal_name}} is a COMPLETE name — never add another noun like फंड or लक्ष्य right after it.
@@ -155,6 +157,17 @@ RULES FOR "reply":
 5c. EMERGENCY_CONSULT: if she mentions an emergency, urgent need, crisis, illness, or worry about needing money — e.g. "बच्चा बीमार है", "इमरजेंसी है", "पैसे चाहिए अर्जेंट", "ज़रूरत पड़ गई", "क्या मैं पैसे निकालूँ" — WITHOUT naming a specific amount she wants to take out, set "intent":"emergency_consult", "amount": null. Do NOT withdraw anything. Act as her financial consultant: acknowledge her situation warmly, tell her how much she has (use {{balance}}), explain what the withdrawal would mean for her goal (use {{goal_name}} and {{goal_remaining}}), and ask her to decide how much she actually needs. Be supportive, never dismissive. Say something like "आपके पास {{balance}} रुपये हैं। {{goal_name}} तक {{goal_remaining}} रुपये बाकी हैं। बताइए कितने निकालने हैं, मैं यहाँ हूँ।"
 5d. EMERGENCY_WITHDRAW: if she mentions an emergency/urgent need AND names a SPECIFIC amount — e.g. "इमरजेंसी में 500 निकालो", "बच्चे की दवाई के लिए 200 चाहिए", "ज़रूरी है 1000 निकालो" — set "intent":"emergency_withdraw" with the amount. This is a decided action, proceed with past tense confirmation.
 SMALLTALK: greeting, chit-chat, OR any general financial question — loan advice, investment questions, money worries → smalltalk. For financial questions, give a warm, practical one-sentence answer as her Bank Sakhi. Unclear → unknown.
+5g. GROWING HER MONEY: if she asks how money grows, where to keep it, whether to invest, what interest is, or what her money becomes over time — that is grow_money.
+   Extra placeholders you may use ONLY for this intent, all pre-computed:
+   {{grow_savings}} — what her balance becomes in a savings account in a year
+   {{grow_1yr}} — what it becomes in a recurring deposit in a year
+   {{grow_gain}} — the difference between those two
+   {{grow_rate}} — the assumed deposit rate as a percentage
+   {{grow_with_weekly}} — the total if she also keeps adding every week
+   YOUR REPLY MUST CONTAIN {{grow_savings}} AND {{grow_1yr}}. A vague answer like "पैसा थोड़ा बढ़ जाएगा" is useless to her — she cannot read a chart, the numbers are the whole point, and these placeholders are safe because they are computed for you.
+   Teach the idea in one or two plain sentences: money kept at home stays the same, in a bank account it grows a little, in a recurring deposit it grows more, because the bank pays interest.
+   MANDATORY: say clearly that this is information only ("यह सिर्फ जानकारी है") and that interest rates change. NEVER name a bank, scheme or product. NEVER promise or guarantee a return. NEVER tell her she should invest — she decides. Do not discuss shares, mutual funds or crypto.
+
 5a. RECONCILE: if she states what she ACTUALLY has now — "मेरे पास असल में अठारह हज़ार हैं", "गिनती की तो 18000 निकले" — that is reconcile, and "amount" is the true TOTAL she stated, not a difference. Use this when the app's number has drifted from the cash in her hand. If she instead names an amount she took out ("इमरजेंसी में 500 निकाल लिए"), that is emergency_withdraw with amount 500.
 5b. SPENDING: if she mentions money already spent or something bought — खरीदा, खरीदी, खर्च, सामान, सब्ज़ी, राशन — that is spend_mention. Set "amount": null and change nothing.
 6. WITHDRAW SAFETY: if she names more than the balance, set "amount": null — never the balance, never what she asked. Say gently that only {{balance}} is available and ask how much. A number here would empty her savings on a request you meant to decline.
@@ -284,6 +297,16 @@ async function applyIntent(result, state) {
     result.reply = "{{amount}} रुपये — किस लिए चाहिए? बता दीजिए तो साथ मिलकर सोच लेते हैं।";
     return { next: state, refused: false };
   }
+  /* The model classifies, we do the explaining.
+   *
+   * Left to write its own sentence it labelled the recurring-deposit figure as
+   * the keep-adding-weekly figure — both numbers real, so guardNumbers passed
+   * them, and only the description was wrong. On the one screen whose whole
+   * job is teaching her what interest is, that is not a risk worth taking. */
+  if (result.intent === "grow_money") {
+    result.reply = SAFE_TEMPLATES.grow_money;
+    return { next: state, refused: false };
+  }
   if (result.intent === "reconcile" && Number.isFinite(result.amount)) {
     const { state: next } = reconcile(state, result.amount);
     return { next, refused: false };
@@ -328,7 +351,14 @@ async function applyIntent(result, state) {
 
 function substitute(text, result, state) {
   const g = state.goal;
+  const grow = projectGrowth(state);
   const map = {
+    // growth figures — computed in growthService, never by the model
+    "{{grow_1yr}}": grow.rd,
+    "{{grow_savings}}": grow.savings,
+    "{{grow_gain}}": grow.gain,
+    "{{grow_rate}}": grow.ratePct,
+    "{{grow_with_weekly}}": grow.withWeekly,
     "{{balance}}": state.hiddenSavings,
     /* After a goal completes there is no current goal, but the reply is still
      * about the thing she just bought — fall back to the name captured before
@@ -357,6 +387,11 @@ const SAFE_TEMPLATES = {
     "यह तिजोरी सिर्फ आपकी बचत के लिए है, रोज़ का खर्च यहाँ नहीं जुड़ता। ज़रूरत हो तो बताइए, पैसे निकाल सकती हैं।",
   reconcile: "ठीक है, अब तिजोरी में {{balance}} रुपये दर्ज हैं।",
   withdraw_advice: "पैसे आपके हैं और फैसला भी आपका। जो ठीक लगे वही कीजिए।",
+  grow_money:
+    "घर में रखा {{balance}} रुपये साल भर बाद उतना ही रहता है। " +
+    "बचत खाते में लगभग {{grow_savings}} हो जाता, और आवर्ती जमा में लगभग {{grow_1yr}} — " +
+    "यानी {{grow_gain}} रुपये ज़्यादा। हर हफ्ते {{safe_to_save}} रुपये और जोड़ती रहें तो लगभग {{grow_with_weekly}}। " +
+    "यह सिर्फ जानकारी है, सलाह नहीं — ब्याज दरें बदलती रहती हैं।",
   set_goal: "बिल्कुल! {{goal_name}} आपका नया सपना है। लक्ष्य {{goal_target}} रुपये रखा है — ठीक है या बदलना है?",
   goal_achieved: "मुबारक हो! आपका सपना पूरा हुआ। अब अगला सपना क्या है?",
   emergency_consult: "आपके पास अभी {{balance}} रुपये हैं। {{goal_name}} तक {{goal_remaining}} रुपये बाकी हैं। बताइए कितने निकालने हैं, मैं यहाँ हूँ।",
@@ -371,10 +406,18 @@ function guardNumbers(reply, result, state) {
   const ascii = reply.replace(/[०-९]/g, (d) => "०१२३४५६७८९".indexOf(d));
   const found = (ascii.match(/\d+/g) || []).map(Number);
 
+  /* Growth projections are real values too — computed in growthService, not
+   * invented by the model. Without them here the guard would strip every
+   * investment figure as a hallucination, which is exactly what it did before
+   * these were added. */
+  const grow = projectGrowth(state);
+
   const allowed = new Set([
     state.hiddenSavings, state.safeToSave,
     g ? g.saved : 0, g ? g.target : 0, g ? Math.max(0, g.target - g.saved) : 0,
     result.amount,
+    grow.rd, grow.savings, grow.gain, grow.withWeekly, grow.weeklyFV,
+    grow.weeklyDeposited, grow.ratePct, grow.savingsPct,
   ].filter(Number.isFinite));
 
   const bad = found.filter((n) => n >= 100 && !allowed.has(n));

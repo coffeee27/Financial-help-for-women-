@@ -27,7 +27,13 @@ Use ₹ (INR) when discussing money unless the user specifies another currency.`
  * @param {Array<{role: string, content: string}>} history - prior conversation turns (role/content only)
  * @returns {Promise<string>} assistant reply text
  */
-export async function sendMessage(message, history = []) {
+export async function sendMessage(message, history = [], language = "en" ) {
+  const languageInstruction =
+    language === "hi"
+      ? "\n\nRespond in Hindi (Devanagari script), simple conversational Hindi, not overly formal."
+      : "\n\nRespond in English.";
+
+
   if (!message || !message.trim()) {
     throw new Error("Message cannot be empty.");
   }
@@ -40,7 +46,7 @@ export async function sendMessage(message, history = []) {
 
   // Build the messages array: system prompt + prior turns + new user message
   const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: SYSTEM_PROMPT + languageInstruction },
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user", content: message },
   ];

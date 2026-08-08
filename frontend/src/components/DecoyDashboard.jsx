@@ -4,6 +4,7 @@ import { useFinance } from "../context/FinanceContext";
 import BalanceCard from "./Dashboard/BalanceCard";
 import TransactionList from "./Dashboard/TransactionList";
 import BottomNav from "./Dashboard/BottomNav";
+import { useTranslation } from "react-i18next";
 
 /* The decoy.
  *
@@ -25,10 +26,10 @@ import BottomNav from "./Dashboard/BottomNav";
  */
 
 const TITLES = {
-  goals: { hi: "लक्ष्य", en: "Goals" },
-  voice: { hi: "आवाज़", en: "Voice" },
-  emergency: { hi: "मदद", en: "Support" },
-  settings: { hi: "सेटिंग्स", en: "Settings" },
+  goals: "dashboard.goals",
+  voice: "dashboard.voice",
+  emergency: "dashboard.support",
+  settings: "dashboard.settings",
 };
 
 function Row({ label, value }) {
@@ -44,6 +45,7 @@ export default function DecoyDashboard({ onLock }) {
   const { state } = useFinance();
   const [tab, setTab] = useState("home");
   const scrollRef = useRef(null);
+  const { t } = useTranslation();
 
   const changeTab = (next) => {
     setTab(next);
@@ -62,7 +64,7 @@ export default function DecoyDashboard({ onLock }) {
           <div>
             {tab === "home" ? (
               <>
-                <p className="deva text-[13px] text-bark-500">{state.user.greeting}</p>
+                <p className="deva text-[13px] text-bark-500">{t("dashboard.greeting")}</p>
                 <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
                   {state.user.name}
                 </h1>
@@ -70,10 +72,10 @@ export default function DecoyDashboard({ onLock }) {
             ) : (
               <>
                 <p className="text-[10px] tracking-[.26em] uppercase text-bark-500">
-                  {TITLES[tab].en}
+                  {t(TITLES[tab])}
                 </p>
                 <h1 className="deva text-[26px] leading-tight font-semibold text-bark-900">
-                  {TITLES[tab].hi}
+                  {t(`${TITLES[tab]}.title`)}
                 </h1>
               </>
             )}

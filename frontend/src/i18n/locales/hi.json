@@ -1,0 +1,175 @@
+{
+  "app": {
+    "name": "महिलाओं के लिए वित्तीय सहायता"
+  },
+  "pin": {
+    "title": "अपना पिन दर्ज करें",
+    "subtitle": "जारी रखने के लिए अपना 4-अंकीय पिन दर्ज करें",
+    "submit": "अनलॉक करें",
+    "error": "गलत पिन। कृपया पुनः प्रयास करें।"
+  },
+  "dashboard": {
+    "greeting": "वापसी पर स्वागत है",
+    "balance": "बैलेंस",
+    "goals": "आपके लक्ष्य",
+    "addGoal": "लक्ष्य जोड़ें",
+    "insights": "जानकारियाँ",
+    "savingsTip": "इस सप्ताह आप सुरक्षित रूप से ₹{{amount}} बचा सकती हैं",
+    "transactions": "हाल के लेन-देन",
+    "hiddenSavings": "छिपी हुई बचत",
+    "thisWeek": "इस हफ्ते",
+"weekSaving": "इस हफ्ते ₹{{amount}} बचाए"
+  },
+  "chat": {
+    "title": "वित्तीय सहायक",
+    "subtitle": "हमेशा यहाँ, हमेशा धैर्यवान",
+    "welcome": "नमस्ते! मैं आपकी वित्तीय सलाहकार हूं। बचत, बजट, धोखाधड़ी या अपने लक्ष्यों के बारे में मुझसे कुछ भी पूछें — कोई भी सवाल छोटा नहीं होता।",
+    "placeholder": "बचत, बजट, धोखाधड़ी के बारे में पूछें…",
+    "listening": "सुन रही हूं…",
+    "voiceOn": "आवाज़ में उत्तर चालू",
+    "voiceOff": "आवाज़ में उत्तर बंद",
+    "send": "भेजें"
+  },
+  "common": {
+    "loading": "लोड हो रहा है…",
+    "error": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "close": "बंद करें",
+    "back": "वापस"
+  },
+  "language": {
+    "label": "भाषा",
+    "english": "English",
+    "hindi": "हिन्दी"
+  },
+ "goals": {
+  "title": "सपना लक्ष्य",
+  "sewingMachine": "अपनी सिलाई मशीन",
+  "noGoal": "अभी कोई लक्ष्य नहीं",
+  "addDream": "सपना लक्ष्य जोड़ें",
+  "selectDream": "अपना सपना चुनें",
+  "prompt": "किसी खास चीज़ के लिए बचत शुरू करें",
+  "saved": "बचत",
+  "target": "लक्ष्य",
+  "needed": "अभी चाहिए",
+  "completed": "पूरा हुआ",
+  "contributions": "योगदान",
+  "weeks": "हफ्ते",
+  "paceTitle": "इस रफ़्तार से",
+"paceMessage": "हर हफ्ते ₹{{amount}} बचाने पर, लगभग {{weeks}} हफ्ते में {{goal}} आपकी हो जाएगी।",
+"completedMessage": "मैंने {{goal}} ले ली!"
+},
+"voice": {
+  "title": "आवाज़ सहायक",
+  "try": "ऐसा बोलकर देखें",
+  "speak": "हिंदी में बोलिए — कोई पढ़ना नहीं पड़ेगा",
+  "listening": "सुन रही हूँ...",
+  "thinking": "सोच रही हूँ...",
+
+  "suggestions": {
+    "save": "मेरी बचत कितनी है",
+    "saveEn": "How much have I saved?",
+
+    "twoHundred": "दो सौ बचाओ",
+    "twoHundredEn": "Save ₹200",
+
+    "goal": "बकरी के लिए और कितना चाहिए",
+    "goalEn": "How much more for the goal?",
+
+    "private": "अगर किसी को पता चल गया तो",
+    "privateEn": "What if someone finds out?"
+  }
+},
+"tabs":{
+  "goals":"लक्ष्य",
+  "voice":"आवाज़",
+  "emergency":"सहायता",
+  "settings":"सेटिंग्स"
+},
+"settings": {
+  "privacy": "गोपनीयता",
+
+  "silentTransactions": "चुपचाप लेन-देन",
+  "silentTransactionsSub": "कोई SMS नहीं, कोई नोटिफिकेशन नहीं",
+
+  "hiddenAccount": "छुपा हुआ खाता",
+  "hiddenAccountSub": "सिर्फ आपके PIN के पीछे दिखता है",
+
+  "secondPin": "दूसरा PIN",
+  "secondPinSub": "दबाव में अलग स्क्रीन खुलती है",
+
+  "hideApp": "ऐप का नाम छुपाएँ",
+  "hideAppSub": "होम स्क्रीन पर साधारण नाम",
+
+  "voiceLanguage": "आवाज़ और भाषा",
+
+  "language": "भाषा",
+  "currentLanguage": "हिन्दी",
+
+  "offlineCoach": "फोन पर ही सोचने वाला कोच",
+  "offlineCoachSub": "बिना इंटरनेट, कोई रिकॉर्ड नहीं",
+
+  "languages": "22 भाषाएँ",
+  "languagesSub": "भाषिणी के ज़रिए",
+
+  "roadmap": "रोडमैप",
+  "on": "चालू",
+  "off": "बंद",
+
+  "lock": "तिजोरी बंद कीजिए"
+},
+"home": {
+  "welcome": "वापसी पर स्वागत है",
+  "savings": "छुपी हुई बचत",
+  "thisWeek": "इस हफ्ते",
+  "speak": "बोलने के लिए दबाएं",
+  "listening": "सुन रही हूँ...",
+  "thinking": "सोच रही हूँ..."
+},
+
+"transactions": {
+  "recent": "हाल के लेन-देन",
+  "weeklySaving": "साप्ताहिक बचत",
+  "tailoringWork": "सिलाई का काम",
+  "vegetables": "सब्ज़ी",
+  "groceries": "राशन"
+},
+"dates": {
+  "today": "आज",
+  "threeDaysAgo": "3 दिन पहले",
+  "lastWeek": "पिछले हफ्ते",
+  "yesterday": "कल",
+  "fourDaysAgo": "4 दिन पहले"
+},
+
+ "emergency":{
+   "withdrawalRequested":"निकासी का अनुरोध",
+   "now":"अभी",
+   "after":"बाद में",
+   "goalDelay":"लगभग",
+   "weeks":"हफ्ते और दूर हो जाएगी",
+   "warning":"पैसे आपके हैं। आराम से सोचकर फैसला कीजिए।",
+   "cancel":"रहने दीजिए",
+   "confirm":"हाँ, निकालिए",
+   "noWithdrawal":"अभी कोई निकासी बाकी नहीं है",
+   "noWithdrawalDesc":"पैसे निकालने हों तो बोलिए। पहले साथ में देखेंगे।",
+   "talk":"बात करके समझें",
+   "rupeesWithdrawn":"रुपये निकाल दिए गए हैं।",
+   "remaining":"रुपये बचे हैं।",
+   "cancelVoice":"ठीक है, पैसे तिजोरी में ही रहेंगे।"
+ },
+ "insight": {
+  "thisWeek": "इस हफ्ते",
+  "noGoal": "इस हफ्ते कोई लक्ष्य नहीं है।",
+    "remaining": "लक्ष्य तक ₹{{remaining}} और चाहिए — लगभग {{weeks}} हफ्ते।",
+    "remainingNoWeeks": "लक्ष्य तक ₹{{remaining}} और चाहिए।",
+  "safeSave": "इस हफ्ते आप ₹{{amount}} सुरक्षित बचा सकती हैं।",
+  "goalWeeks": "लक्ष्य तक ₹{{remaining}} और चाहिए — लगभग {{weeks}} हफ्ते।",
+  "goalRemaining": "लक्ष्य तक ₹{{remaining}} और चाहिए।"
+},
+"greetings": {
+  "evening": "शुभ संध्या"
+}
+
+}
