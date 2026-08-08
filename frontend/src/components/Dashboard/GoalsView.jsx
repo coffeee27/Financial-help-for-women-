@@ -34,7 +34,6 @@ export default function GoalsView({ state }) {
         <h2 className="deva mt-2 text-[24px] leading-tight font-semibold text-bark-900">
           {goal.name}
         </h2>
-        <p className="text-[12px] text-bark-500 mt-1">{goal.nameEn}</p>
 
         <div className="relative mx-auto mt-6 w-[196px] h-[196px]">
           <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">

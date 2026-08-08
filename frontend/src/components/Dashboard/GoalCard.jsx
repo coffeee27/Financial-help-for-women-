@@ -37,7 +37,6 @@ export default function GoalCard({ goal, state }) {
           <h3 className="deva mt-2 text-[22px] leading-tight font-semibold text-bark-900">
             {goal.name}
           </h3>
-          <p className="text-[12px] text-bark-500 mt-1">{goal.nameEn}</p>
         </div>
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
